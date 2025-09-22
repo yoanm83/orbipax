@@ -1,8 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { getServiceClient } from "@/shared/lib/supabase.server";
+
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
+import { getServiceClient } from "@/shared/lib/supabase.server";
 
 export type ListPatientsInput = { q?: string; limit?: number; offset?: number };
 export type PatientRow = { id: string; first_name: string; last_name: string; dob: string | null };
@@ -23,7 +24,7 @@ export async function listPatients(input: ListPatientsInput = {}): Promise<{ ite
   }
 
   const { data, error, count } = await query;
-  if (error) throw error;
+  if (error) {throw error;}
   return { items: (data ?? []) as PatientRow[], total: count ?? 0 };
 }
 
@@ -69,7 +70,7 @@ const patientSchema = z.object({
 
 export async function createPatient(input: unknown) {
   const parsed = patientSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  if (!parsed.success) {return { ok: false, error: "invalid_input" };}
   const { firstName, lastName, dob, phone, email } = parsed.data;
 
   const { organizationId, userId } = await resolveUserAndOrg();
@@ -85,7 +86,7 @@ export async function createPatient(input: unknown) {
     email: email ?? null,
   }).select("id").maybeSingle();
 
-  if (error || !data?.id) return { ok: false, error: "create_failed" };
+  if (error || !data?.id) {return { ok: false, error: "create_failed" };}
 
   // audit
   await sb.from("orbipax.audit_logs").insert({
@@ -103,9 +104,9 @@ export async function createPatient(input: unknown) {
 }
 
 export async function updatePatient(id: string, input: unknown) {
-  if (!id) return { ok: false, error: "missing_id" };
+  if (!id) {return { ok: false, error: "missing_id" };}
   const parsed = patientSchema.partial().safeParse(input);
-  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  if (!parsed.success) {return { ok: false, error: "invalid_input" };}
 
   const { organizationId, userId } = await resolveUserAndOrg();
   const sb = getServiceClient();
@@ -121,7 +122,7 @@ export async function updatePatient(id: string, input: unknown) {
     .eq("organization_id", organizationId)
     .eq("id", id);
 
-  if (error) return { ok: false, error: "update_failed" };
+  if (error) {return { ok: false, error: "update_failed" };}
 
   await sb.from("orbipax.audit_logs").insert({
     organization_id: organizationId,

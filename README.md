@@ -377,3 +377,59 @@ if (result.ok) {
 - **Generic Errors:** No sensitive information exposed in error messages
 - **Audit Trail:** Complete tracking of patient data changes
 - **RLS Compliance:** Database-level access control enforcement
+
+## Design System - Tailwind CSS v4
+
+OrbiPax has migrated to Tailwind CSS v4 with modern CSS-first configuration for enhanced performance and developer experience.
+
+### CSS Architecture
+- **Modern CSS**: Tailwind CSS v4 with CSS-first configuration using `@theme` blocks
+- **PostCSS Plugin**: Using `@tailwindcss/postcss` for optimal performance
+- **Single Entry Point**: `src/styles/globals.css` - all global styles and Tailwind configuration
+- **CSS Variables**: Design tokens stored as CSS custom properties with OKLCH color values
+- **Responsive Containers**: `.container-safe` utility for consistent responsive behavior
+- **Accessibility**: WCAG 2.2 AA compliant focus styles and interaction patterns
+
+### Tailwind v4 Features
+- **Performance**: 3.78x faster full rebuilds, 8.8x faster incremental builds
+- **@theme Tokens**: Base v4 tokens configured (bg, fg, primary, border, ring)
+- **Official Plugins**: `@tailwindcss/forms` and `@tailwindcss/typography` via `@plugin` syntax
+- **CSS Import**: Single `@import "tailwindcss"` replaces old `@tailwind` directives
+
+### Typography
+- **Font Family**: Manrope (Google Fonts) - modern, readable, professional
+- **Fluid Scale**: CSS clamp-based typography scale (`--step-*` tokens)
+- **Tabular Numbers**: Enabled by default for better number alignment in tables/data
+- **Typography Plugin**: Enhanced prose styling via `@tailwindcss/typography`
+
+### Color System
+- **OKLCH Values**: All colors use OKLCH color space for better color science and wider gamut
+- **CSS Variables**: All color tokens accessible via `var()` in both CSS and Tailwind utilities
+- **Dark Mode**: Comprehensive dark mode support with optimized OKLCH values
+- **v4 Base Tokens**: HSL base tokens for compatibility, extensible to OKLCH
+
+### Example Usage
+
+```html
+<!-- Typography with prose classes -->
+<article class="prose prose-lg mx-auto">
+  <h1>Clinical Documentation</h1>
+  <p>Enhanced typography with @tailwindcss/typography plugin.</p>
+</article>
+
+<!-- Form styling with forms plugin -->
+<input type="text" class="form-input rounded-md border-gray-300 focus:border-blue-500" />
+```
+
+### Theme Configuration
+
+```css
+@theme {
+  --color-bg: hsl(0 0% 100%);
+  --color-fg: hsl(240 10% 3.9%);
+  --color-primary: hsl(221 83% 53%);
+  --color-on-primary: hsl(0 0% 100%);
+  --color-border: hsl(240 5% 84%);
+  --ring: 0 0% 0%;
+}
+```

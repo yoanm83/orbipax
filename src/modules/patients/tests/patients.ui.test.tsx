@@ -9,9 +9,10 @@
  */
 
 import { render, screen } from "@testing-library/react";
+
 import "@testing-library/jest-dom";
-import PatientsList from "../ui/PatientsList";
 import PatientForm from "../ui/PatientForm";
+import PatientsList from "../ui/PatientsList";
 
 describe("PatientsList", () => {
   it("renders empty state when no patients", () => {

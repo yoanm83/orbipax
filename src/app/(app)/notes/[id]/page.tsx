@@ -1,8 +1,9 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import { getNote, saveNote, signNote, amendNote, autoSaveNote, exportNotePdf } from "@/modules/notes/application/notes.actions";
 import { useEffect, useState, useRef, useCallback } from "react";
+
+import { getNote, saveNote, signNote, amendNote, autoSaveNote, exportNotePdf } from "@/modules/notes/application/notes.actions";
+
 
 interface NotePageProps {
   params: {
@@ -48,7 +49,7 @@ export default function NotePage({ params }: NotePageProps) {
 
   // Debounced auto-save function
   const debouncedAutoSave = useCallback(async (title: string, content: string) => {
-    if (!isDraft || !note) return;
+    if (!isDraft || !note) {return;}
 
     setSaveStatus('saving');
 
@@ -76,7 +77,7 @@ export default function NotePage({ params }: NotePageProps) {
 
   // Handle input changes with debouncing
   const handleInputChange = useCallback(() => {
-    if (!isDraft) return;
+    if (!isDraft) {return;}
 
     // Clear existing timeout
     if (autoSaveTimeoutRef.current) {

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { rescheduleAppointment, listAppointments } from "@/modules/appointments/application/appointments.actions";
 
 interface RescheduleAppointmentPageProps {

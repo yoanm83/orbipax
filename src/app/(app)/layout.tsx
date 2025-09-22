@@ -1,8 +1,10 @@
-import GlobalsBridge from "../globals-bridge";
 import { AuthGate } from "@/shared/auth/auth-gate.client";
-import { AppNavbar } from "@/shared/ui/nav/AppNavbar";
 import { Breadcrumbs } from "@/shared/ui/breadcrumbs/Breadcrumbs";
+import { AppNavbar } from "@/shared/ui/nav/AppNavbar";
+
 import { OrgSwitcher } from "@/modules/organizations/ui/OrgSwitcher";
+
+import GlobalsBridge from "../globals-bridge";
 
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
   return (

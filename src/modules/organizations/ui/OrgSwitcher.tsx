@@ -1,6 +1,8 @@
 import { revalidatePath } from "next/cache";
-import { listAccessibleOrganizations, switchOrganization } from "@/modules/organizations/application/organizations.actions";
+
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
+
+import { listAccessibleOrganizations, switchOrganization } from "@/modules/organizations/application/organizations.actions";
 
 export async function OrgSwitcher() {
   // Get current user's organization and accessible organizations

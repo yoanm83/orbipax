@@ -12,15 +12,18 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedSideEffectImports": true,
-
     // =================================================================
     // MODULE RESOLUTION & COMPILATION
     // =================================================================
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "target": "ES2022",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "jsx": "react-jsx",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "jsx": "preserve",
     "allowJs": false,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
@@ -29,7 +32,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-
     // =================================================================
     // OUTPUT CONFIGURATION
     // =================================================================
@@ -38,34 +40,46 @@
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false,
-
     // =================================================================
     // PATH MAPPING FOR CLEAN IMPORTS
     // =================================================================
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/shared/*": ["./src/shared/*"],
-      "@/modules/*": ["./src/modules/*"],
-      "@/app/*": ["./src/app/*"],
-      "@/styles/*": ["./src/styles/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/shared/*": [
+        "./src/shared/*"
+      ],
+      "@/modules/*": [
+        "./src/modules/*"
+      ],
+      "@/app/*": [
+        "./src/app/*"
+      ],
+      "@/styles/*": [
+        "./src/styles/*"
+      ]
     },
-
     // =================================================================
     // TYPE CHECKING CONFIGURATION
     // =================================================================
     "useUnknownInCatchVariables": true,
     "noErrorTruncation": true,
-    "preserveConstEnums": false,
-    "removeComments": false
+    "removeComments": false,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-
   // =================================================================
   // PROJECT STRUCTURE
   // =================================================================
   "include": [
+    "next-env.d.ts",
     "src/**/*",
-    "next-env.d.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -77,13 +91,11 @@
     "**/*.test.ts",
     "**/*.test.tsx"
   ],
-
   // =================================================================
   // TYPESCRIPT PROJECT REFERENCES (Future)
   // =================================================================
   "references": []
 }
-
 // =================================================================
 // ARCHITECTURAL CONSTRAINTS ENFORCED BY TYPESCRIPT
 // =================================================================

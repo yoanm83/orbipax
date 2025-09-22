@@ -34,7 +34,7 @@ export default function PatientForm({ mode, id }: { mode: "create" | "edit"; id?
     const fd = new FormData(e.currentTarget);
     const res = mode === "create" ? await actionCreate(fd) : await actionUpdate(id!, fd);
     setMsg(res.ok ? "Saved" : "Failed");
-    if (res.ok && mode === "create") window.location.href = "/(app)/patients";
+    if (res.ok && mode === "create") {window.location.href = "/(app)/patients";}
   }
 
   return (

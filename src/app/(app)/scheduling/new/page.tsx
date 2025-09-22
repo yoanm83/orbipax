@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 
 async function actionCreateAppointment(form: FormData) {
   "use server";

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { createOrganization } from "@/modules/organizations/application/organizations.actions";
 
 export default function NewOrgPage() {

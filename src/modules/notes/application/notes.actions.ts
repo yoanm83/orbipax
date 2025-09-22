@@ -1,8 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { getServiceClient } from "@/shared/lib/supabase.server";
+
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
+import { getServiceClient } from "@/shared/lib/supabase.server";
 
 const getNoteSchema = z.object({
   id: z.string().uuid("Note ID must be a valid UUID"),

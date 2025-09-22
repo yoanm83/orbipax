@@ -1,5 +1,6 @@
-import { listAppointments, cancelAppointment, listPatientsForDropdown, listCliniciansForDropdown } from "@/modules/appointments/application/appointments.actions";
 import { revalidatePath } from "next/cache";
+
+import { listAppointments, cancelAppointment, listPatientsForDropdown, listCliniciansForDropdown } from "@/modules/appointments/application/appointments.actions";
 
 interface AppointmentsPageProps {
   searchParams: {

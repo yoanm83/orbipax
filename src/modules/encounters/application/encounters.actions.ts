@@ -1,8 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { getServiceClient } from "@/shared/lib/supabase.server";
+
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
+import { getServiceClient } from "@/shared/lib/supabase.server";
 
 const startEncounterFromAppointmentSchema = z.object({
   appointmentId: z.string().uuid("Appointment ID must be a valid UUID"),

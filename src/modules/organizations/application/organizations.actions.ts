@@ -1,8 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { getServiceClient } from "@/shared/lib/supabase.server";
+
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
+import { getServiceClient } from "@/shared/lib/supabase.server";
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(64, "Name must be at most 64 characters").trim(),
@@ -50,7 +51,7 @@ export async function createOrganization(input: { name: string }): Promise<{ id:
     return await createOrganizationManual(sb, name, baseSlug, userId);
   }
 
-  if (!result || !result.organization_id || !result.slug) {
+  if (!result?.organization_id || !result.slug) {
     throw new Error("Organization creation failed - invalid response from transaction");
   }
 

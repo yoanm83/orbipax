@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { switchOrganization, listAccessibleOrganizations } from "@/modules/organizations/application/organizations.actions";
 
 export default async function SwitchOrgPage() {

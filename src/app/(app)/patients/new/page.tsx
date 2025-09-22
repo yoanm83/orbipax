@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { createPatient } from "@/modules/patients/application/patients.actions";
 
 export default function NewPatientPage() {

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { startEncounterFromAppointment } from "@/modules/encounters/application/encounters.actions";
+
 import { listAppointments } from "@/modules/appointments/application/appointments.actions";
+import { startEncounterFromAppointment } from "@/modules/encounters/application/encounters.actions";
 
 interface StartEncounterPageProps {
   params: {

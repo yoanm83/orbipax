@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { createAppointment, listPatientsForDropdown, listCliniciansForDropdown } from "@/modules/appointments/application/appointments.actions";
 
 export default async function NewAppointmentPage() {

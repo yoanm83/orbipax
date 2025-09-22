@@ -1,8 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { getServiceClient } from "@/shared/lib/supabase.server";
+
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
+import { getServiceClient } from "@/shared/lib/supabase.server";
 
 const createPatientSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters").max(64, "First name must be at most 64 characters").trim(),
