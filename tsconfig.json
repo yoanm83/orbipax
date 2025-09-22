@@ -1,0 +1,109 @@
+{
+  "compilerOptions": {
+    // =================================================================
+    // STRICT MODE CONFIGURATION - ALL CHECKS ENABLED
+    // =================================================================
+    "strict": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedSideEffectImports": true,
+
+    // =================================================================
+    // MODULE RESOLUTION & COMPILATION
+    // =================================================================
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "react-jsx",
+    "allowJs": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    // =================================================================
+    // OUTPUT CONFIGURATION
+    // =================================================================
+    "noEmit": true,
+    "incremental": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+
+    // =================================================================
+    // PATH MAPPING FOR CLEAN IMPORTS
+    // =================================================================
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/styles/*": ["./src/styles/*"]
+    },
+
+    // =================================================================
+    // TYPE CHECKING CONFIGURATION
+    // =================================================================
+    "useUnknownInCatchVariables": true,
+    "noErrorTruncation": true,
+    "preserveConstEnums": false,
+    "removeComments": false
+  },
+
+  // =================================================================
+  // PROJECT STRUCTURE
+  // =================================================================
+  "include": [
+    "src/**/*",
+    "next-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "tmp",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
+
+  // =================================================================
+  // TYPESCRIPT PROJECT REFERENCES (Future)
+  // =================================================================
+  "references": []
+}
+
+// =================================================================
+// ARCHITECTURAL CONSTRAINTS ENFORCED BY TYPESCRIPT
+// =================================================================
+//
+// Domain layer must stay framework-free:
+// - Only types, interfaces, and Zod schemas allowed
+// - No React, Next.js, or external service imports
+// - Pure business logic and value objects only
+//
+// Application layer acts as coordination layer:
+// - Orchestrates between domain and infrastructure
+// - Implements use cases and business workflows
+// - Returns JSON-serializable objects for UI consumption
+//
+// Infrastructure layer provides external adapters:
+// - Database repositories, API clients, file storage
+// - Only imported by application layer, never by UI/domain
+// - Implements domain-defined interfaces
+//
+// UI layer remains presentation-focused:
+// - Components, pages, and user interactions
+// - Consumes application layer services
+// - No direct infrastructure or external service access

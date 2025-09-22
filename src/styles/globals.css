@@ -1,0 +1,265 @@
+/* OrbiPax Global Styles - Single Tailwind Entry Point */
+/* No @import chains - all tokens centralized here */
+/* OKLCH color tokens and design system definitions */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap');
+
+@import "tailwindcss";
+
+/* Tailwind v4 Base Tokens */
+@theme {
+  --color-bg: hsl(0 0% 100%);
+  --color-fg: hsl(240 10% 3.9%);
+  --color-primary: hsl(221 83% 53%);
+  --color-on-primary: hsl(0 0% 100%);
+  --color-border: hsl(240 5% 84%);
+  --ring: 0 0% 0%;
+}
+
+/* Official Plugins (v4) */
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+/* ========================================================================
+   CSS CUSTOM PROPERTIES - OKLCH TOKENS
+   ======================================================================== */
+
+:root {
+  /* Color Tokens - OKLCH values for better color science */
+  /* Background and foreground */
+  --bg: oklch(98% 0.01 89);           /* Light neutral background */
+  --fg: oklch(15% 0.02 89);           /* Dark text */
+
+  /* Muted variations */
+  --muted: oklch(95% 0.01 89);        /* Subtle background */
+  --muted-fg: oklch(45% 0.02 89);     /* Muted text */
+
+  /* Primary brand colors */
+  --primary: oklch(47% 0.15 240);     /* Primary blue */
+  --primary-fg: oklch(98% 0.01 240);  /* Text on primary */
+
+  /* Accent colors */
+  --accent: oklch(85% 0.08 150);      /* Accent green */
+  --accent-fg: oklch(20% 0.05 150);   /* Text on accent */
+
+  /* Destructive/error colors */
+  --destructive: oklch(55% 0.18 25);  /* Error red */
+  --destructive-fg: oklch(98% 0.01 25); /* Text on error */
+
+  /* UI elements */
+  --border: oklch(88% 0.02 89);       /* Border color */
+  --ring: oklch(47% 0.15 240);        /* Focus ring */
+  --focus: oklch(47% 0.15 240);       /* Focus indicator */
+
+  /* Typography Scale - Fluid scale using CSS clamp */
+  --step--1: clamp(0.83rem, 0.80rem + 0.17vw, 0.94rem);
+  --step-0: clamp(1.00rem, 0.95rem + 0.24vw, 1.13rem);
+  --step-1: clamp(1.20rem, 1.12rem + 0.34vw, 1.35rem);
+  --step-2: clamp(1.44rem, 1.32rem + 0.47vw, 1.62rem);
+}
+
+/* Dark Mode Overrides */
+.dark {
+  --bg: oklch(12% 0.01 89);           /* Dark background */
+  --fg: oklch(95% 0.01 89);           /* Light text */
+
+  --muted: oklch(18% 0.01 89);        /* Dark muted background */
+  --muted-fg: oklch(65% 0.02 89);     /* Muted light text */
+
+  --primary: oklch(65% 0.15 240);     /* Lighter primary for dark */
+  --primary-fg: oklch(12% 0.01 240);  /* Dark text on primary */
+
+  --accent: oklch(75% 0.08 150);      /* Lighter accent for dark */
+  --accent-fg: oklch(12% 0.01 150);   /* Dark text on accent */
+
+  --destructive: oklch(65% 0.18 25);  /* Lighter error for dark */
+  --destructive-fg: oklch(12% 0.01 25); /* Dark text on error */
+
+  --border: oklch(25% 0.02 89);       /* Dark border */
+  --ring: oklch(65% 0.15 240);        /* Lighter focus ring */
+  --focus: oklch(65% 0.15 240);       /* Lighter focus indicator */
+}
+
+/* ========================================================================
+   BASE STYLES & ACCESSIBILITY
+   ======================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Enhance focus visibility for keyboard navigation */
+  scroll-behavior: smooth;
+}
+
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html, body {
+  font-family: 'Manrope', sans-serif !important;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: 'Manrope', sans-serif !important;
+  font-size: var(--step-0);
+  line-height: 1.5;
+  /* Enable tabular figures for better number alignment */
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========================================================================
+   FOCUS STYLES - WCAG 2.2 AA COMPLIANT
+   ======================================================================== */
+
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Enhanced focus for interactive elements */
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ========================================================================
+   INTERACTIVE ELEMENT STYLES
+   ======================================================================== */
+
+button,
+[role="button"] {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Link accessibility - not color-only cues */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+/* ========================================================================
+   UTILITY CLASSES
+   ======================================================================== */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Safe container with responsive padding for all breakpoints */
+.container-safe {
+  width: 100%;
+  max-width: 2400px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-safe {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-safe {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-safe {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .container-safe {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container-safe {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .container-safe {
+    padding-left: 10rem;
+    padding-right: 10rem;
+  }
+}
+
+/* Keyboard key styling */
+.kbd {
+  background-color: var(--muted);
+  color: var(--muted-fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
