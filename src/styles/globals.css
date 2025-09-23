@@ -95,6 +95,81 @@
     --step-0: var(--font-size-body-m);
     --step-1: var(--font-size-title-m);
     --step-2: var(--font-size-headline-h2);
+
+    /* === PRIMITIVE TOKEN MAPPINGS === */
+    /* P0 - Critical (Blocks Rendering) */
+    /* Background tokens */
+    --bg-popover: var(--bg);
+    --bg-card: var(--bg);
+    --bg-muted: var(--muted);
+    --bg-primary: var(--primary);
+    --bg-bg: var(--bg);
+
+    /* Text/Foreground tokens */
+    --text-popover-foreground: var(--fg);
+    --text-muted-foreground: var(--muted-fg);
+    --text-primary-foreground: var(--primary-fg);
+    --text-foreground: var(--fg);
+    --text-fg: var(--fg);
+    --text-on-primary: var(--primary-fg);
+    --text-on-muted: var(--muted-fg);
+
+    /* P1 - Important (Degrades Styling) */
+    /* Ring/Border tokens */
+    --ring-primary: var(--primary);
+    --ring-ring: var(--ring);
+    --border-primary: var(--primary);
+    --border-border: var(--border);
+    --border-error: var(--destructive);
+    --border-success: oklch(65% 0.15 140);
+    --border-warning: oklch(80% 0.12 85);
+
+    /* Accent tokens */
+    --bg-accent: var(--accent);
+    --text-accent-foreground: var(--accent-fg);
+
+    /* Status background tokens */
+    --bg-success: oklch(65% 0.15 140);
+    --bg-warning: oklch(80% 0.12 85);
+    --bg-error: var(--destructive);
+
+    /* P0 - Missing Critical Tokens (Added 2025-09-23) */
+    /* These map shadcn/radix classes to our DS tokens */
+    --bg-input: var(--muted);
+    --bg-secondary: var(--muted);
+    --text-secondary-foreground: var(--fg);
+    --border-input: var(--border);
+    --bg-background: var(--bg);
+    --text-muted-foreground: var(--muted-fg);
+    --text-foreground: var(--fg);
+    --ring-offset-background: var(--bg);
+
+    /* P2 - Feedback State Tokens (Added 2025-09-23) */
+    /* Success state */
+    --success: oklch(65% 0.15 140);
+    --success-foreground: oklch(98% 0.01 140);
+    --success-border: oklch(55% 0.15 140);
+    --ring-success: oklch(65% 0.15 140);
+
+    /* Info state */
+    --info: oklch(55% 0.15 240);
+    --info-foreground: oklch(98% 0.01 240);
+    --info-border: oklch(45% 0.15 240);
+    --ring-info: oklch(55% 0.15 240);
+
+    /* Warning state */
+    --warning: oklch(80% 0.12 85);
+    --warning-foreground: oklch(20% 0.02 85);
+    --warning-border: oklch(70% 0.12 85);
+    --ring-warning: oklch(80% 0.12 85);
+
+    /* Destructive state (already partially exists) */
+    --destructive-border: oklch(45% 0.18 25);
+    --ring-destructive: oklch(55% 0.18 25);
+
+    /* Map destructive-foreground for consistency */
+    --bg-destructive: var(--destructive);
+    --text-destructive-foreground: var(--destructive-fg);
   }
 
   /* Dark mode OKLCH overrides */
@@ -112,6 +187,81 @@
     --border: oklch(25% 0.02 89);
     --ring: oklch(65% 0.15 240);
     --focus: oklch(65% 0.15 240);
+
+    /* === DARK MODE PRIMITIVE TOKEN MAPPINGS === */
+    /* P0 - Critical (Blocks Rendering) */
+    /* Background tokens */
+    --bg-popover: var(--bg);
+    --bg-card: var(--bg);
+    --bg-muted: var(--muted);
+    --bg-primary: var(--primary);
+    --bg-bg: var(--bg);
+
+    /* Text/Foreground tokens */
+    --text-popover-foreground: var(--fg);
+    --text-muted-foreground: var(--muted-fg);
+    --text-primary-foreground: var(--primary-fg);
+    --text-foreground: var(--fg);
+    --text-fg: var(--fg);
+    --text-on-primary: var(--primary-fg);
+    --text-on-muted: var(--muted-fg);
+
+    /* P1 - Important (Degrades Styling) */
+    /* Ring/Border tokens */
+    --ring-primary: var(--primary);
+    --ring-ring: var(--ring);
+    --border-primary: var(--primary);
+    --border-border: var(--border);
+    --border-error: var(--destructive);
+    --border-success: oklch(65% 0.15 140);
+    --border-warning: oklch(80% 0.12 85);
+
+    /* Accent tokens */
+    --bg-accent: var(--accent);
+    --text-accent-foreground: var(--accent-fg);
+
+    /* Status background tokens */
+    --bg-success: oklch(65% 0.15 140);
+    --bg-warning: oklch(80% 0.12 85);
+    --bg-error: var(--destructive);
+
+    /* P0 - Missing Critical Tokens (Added 2025-09-23) */
+    /* These map shadcn/radix classes to our DS tokens */
+    --bg-input: var(--muted);
+    --bg-secondary: var(--muted);
+    --text-secondary-foreground: var(--fg);
+    --border-input: var(--border);
+    --bg-background: var(--bg);
+    --text-muted-foreground: var(--muted-fg);
+    --text-foreground: var(--fg);
+    --ring-offset-background: var(--bg);
+
+    /* P2 - Feedback State Tokens (Added 2025-09-23) */
+    /* Success state */
+    --success: oklch(65% 0.15 140);
+    --success-foreground: oklch(98% 0.01 140);
+    --success-border: oklch(55% 0.15 140);
+    --ring-success: oklch(65% 0.15 140);
+
+    /* Info state */
+    --info: oklch(55% 0.15 240);
+    --info-foreground: oklch(98% 0.01 240);
+    --info-border: oklch(45% 0.15 240);
+    --ring-info: oklch(55% 0.15 240);
+
+    /* Warning state */
+    --warning: oklch(80% 0.12 85);
+    --warning-foreground: oklch(20% 0.02 85);
+    --warning-border: oklch(70% 0.12 85);
+    --ring-warning: oklch(80% 0.12 85);
+
+    /* Destructive state (already partially exists) */
+    --destructive-border: oklch(45% 0.18 25);
+    --ring-destructive: oklch(55% 0.18 25);
+
+    /* Map destructive-foreground for consistency */
+    --bg-destructive: var(--destructive);
+    --text-destructive-foreground: var(--destructive-fg);
   }
 
   /* Universal box-sizing reset */
@@ -159,26 +309,29 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Focus styles - WCAG 2.2 AA compliant */
+  /* Focus styles - WCAG 2.2 AA compliant with accessible ring */
   *:focus {
     outline: none;
   }
 
   *:focus-visible {
-    outline: none;
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 
-  /* Enhanced focus for interactive elements - disabled for clean UI */
+  /* Enhanced focus for interactive elements with accessible ring */
   button:focus-visible,
   [role="button"]:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: none;
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 
   /* Inputs handle focus via rings */
   input:focus-visible {
-    outline: none;
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 
   /* Prevent browser border-radius overrides */
@@ -205,12 +358,19 @@
   }
 
   button:focus,
-  button:focus-visible,
   button:active,
   [role="button"]:focus,
-  [role="button"]:focus-visible,
   [role="button"]:active {
     outline: none;
+    box-shadow: none;
+    border: none;
+  }
+
+  /* Keep focus-visible separate for accessibility */
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
     box-shadow: none;
     border: none;
   }
@@ -276,9 +436,15 @@
   }
 
   input[type="checkbox"]:focus,
-  input[type="checkbox"]:focus-visible,
   input[type="checkbox"]:active {
     outline: none;
+    box-shadow: none;
+    border: none;
+  }
+
+  input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
     box-shadow: none;
     border: none;
   }

@@ -1,9 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
 import { Input } from "@/shared/ui/primitives/Input"
 import { Label } from "@/shared/ui/primitives/label"
-import { Select } from "@/shared/ui/primitives/Select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
 import { Phone, ChevronUp, ChevronDown } from "lucide-react"
 // TODO: Replace with server-driven form state
 
@@ -16,7 +17,7 @@ type ContactPreference = 'phone' | 'text' | 'email'
 
 export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionProps) {
   // TODO: Replace with server-driven form state
-  const contactInfo = {
+  const [contactInfo, setContactInfo] = useState({
     primaryPhone: '',
     secondaryPhone: '',
     email: '',
@@ -27,10 +28,11 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
       phone: '',
       relationship: ''
     }
-  }
+  })
 
   const handleContactInfoChange = (data: any) => {
     // TODO: Replace with server-driven form handling
+    setContactInfo(prev => ({ ...prev, ...data }))
     console.log('Contact change:', data)
   }
 
@@ -70,6 +72,9 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
               <Label htmlFor="primaryPhone">Primary Phone *</Label>
               <Input
                 id="primaryPhone"
+                name="primaryPhone"
+                type="tel"
+                autoComplete="tel"
                 placeholder="(XXX) XXX-XXXX"
                 required
                 value={formatPhoneForDisplay(contactInfo.primaryPhone)}
@@ -85,6 +90,9 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
               <Label htmlFor="alternatePhone">Alternate Phone</Label>
               <Input
                 id="alternatePhone"
+                name="alternatePhone"
+                type="tel"
+                autoComplete="tel"
                 placeholder="(XXX) XXX-XXXX"
                 value={formatPhoneForDisplay(contactInfo.alternatePhone || '')}
                 onChange={(e) => {
@@ -99,7 +107,9 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
               <Label htmlFor="email">Email Address *</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="Enter your email address"
                 required
                 value={contactInfo.email}
@@ -113,13 +123,15 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
               <Select
                 value={contactInfo.contactPreference}
                 onValueChange={(value: ContactPreference) => handleContactInfoChange({ contactPreference: value })}
-                placeholder="Select preferred method"
               >
-                <Select.Content>
-                  <Select.Item value="phone">Phone Call</Select.Item>
-                  <Select.Item value="text">Text Message</Select.Item>
-                  <Select.Item value="email">Email</Select.Item>
-                </Select.Content>
+                <SelectTrigger id="contactPreference" className="min-h-11">
+                  <SelectValue placeholder="Select preferred method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="phone">Phone Call</SelectItem>
+                  <SelectItem value="text">Text Message</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
@@ -131,6 +143,9 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
                   <Label htmlFor="emergencyName">Contact Name *</Label>
                   <Input
                     id="emergencyName"
+                    name="emergencyName"
+                    type="text"
+                    autoComplete="name"
                     placeholder="Enter emergency contact name"
                     required
                     value={contactInfo.emergencyContact.name}
@@ -147,6 +162,9 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
                   <Label htmlFor="emergencyRelationship">Relationship *</Label>
                   <Input
                     id="emergencyRelationship"
+                    name="emergencyRelationship"
+                    type="text"
+                    autoComplete="off"
                     placeholder="Enter relationship"
                     required
                     value={contactInfo.emergencyContact.relationship}
@@ -163,6 +181,9 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
                   <Label htmlFor="emergencyPhone">Phone Number *</Label>
                   <Input
                     id="emergencyPhone"
+                    name="emergencyPhone"
+                    type="tel"
+                    autoComplete="tel"
                     placeholder="(XXX) XXX-XXXX"
                     required
                     value={formatPhoneForDisplay(contactInfo.emergencyContact.phone)}

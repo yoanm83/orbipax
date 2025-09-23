@@ -1,15 +1,15 @@
 "use client";
 
-import { EnhancedWizardTabs, IntakeWizardStep1Demographics } from "@/modules/intake/ui";
+import { EnhancedWizardTabs, IntakeWizardContent } from "@/modules/intake/ui";
 import { useCurrentStep, useWizardProgressStore, type WizardStep } from "@/modules/intake/state";
 import { handleCreatePatient } from "./actions";
 
 export default function NewPatientPage() {
-  // Use store for wizard navigation state
+  // Use store for wizard navigation state (single source of truth)
   const currentStep = useCurrentStep();
   const { goToStep } = useWizardProgressStore();
 
-  // Handle stepper navigation (UI-only)
+  // Handle stepper navigation - dispatches to store only
   const handleStepClick = (stepId: string) => {
     goToStep(stepId as WizardStep);
   };
@@ -34,7 +34,7 @@ export default function NewPatientPage() {
       {/* Intake Wizard */}
       <div className="mb-8">
         <div className="bg-bg border border-border rounded-lg p-6">
-          {/* Enhanced Wizard Tabs (Stepper) */}
+          {/* Enhanced Wizard Tabs (Stepper) - Controlled Component */}
           <div className="mb-8">
             <EnhancedWizardTabs
               currentStep={currentStep}
@@ -44,22 +44,9 @@ export default function NewPatientPage() {
             />
           </div>
 
-          {/* Step Content */}
+          {/* Step Content - Rendered via Central Renderer */}
           <div className="min-h-[600px]">
-            {currentStep === 'demographics' && <IntakeWizardStep1Demographics />}
-
-            {currentStep !== 'demographics' && (
-              <div className="flex items-center justify-center h-96 text-muted-foreground">
-                <div className="text-center">
-                  <p className="text-lg font-medium">Step: {currentStep}</p>
-                  <p className="text-sm mt-2">Enhanced Wizard Tabs navigation functional</p>
-                  <div className="mt-4 px-4 py-2 bg-bg border border-border rounded-lg">
-                    <p className="text-xs text-muted-foreground">✅ Enhanced Wizard Tabs: Hardened & Production Ready</p>
-                    <p className="text-xs text-muted-foreground">⏳ Step Components: Ready for OrbiPax implementation</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            <IntakeWizardContent />
           </div>
         </div>
       </div>

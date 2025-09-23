@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Select } from "./index";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./index";
 
 // Example 1: Basic Select
 export function BasicSelectExample() {
@@ -16,13 +16,13 @@ export function BasicSelectExample() {
         value={value}
         onValueChange={setValue}
       >
-        <Select.Content>
-          <Select.Item value="apple">Apple</Select.Item>
-          <Select.Item value="banana">Banana</Select.Item>
-          <Select.Item value="orange">Orange</Select.Item>
-          <Select.Item value="grape">Grape</Select.Item>
-          <Select.Item value="pineapple">Pineapple</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="apple">Apple</SelectItem>
+          <SelectItem value="banana">Banana</SelectItem>
+          <SelectItem value="orange">Orange</SelectItem>
+          <SelectItem value="grape">Grape</SelectItem>
+          <SelectItem value="pineapple">Pineapple</SelectItem>
+        </SelectContent>
       </Select>
     </div>
   );
@@ -53,13 +53,13 @@ export function SelectVariantsExample() {
         value={outlined}
         onValueChange={setOutlined}
       >
-        <Select.Content>
+        <SelectContent>
           {countries.map((country) => (
-            <Select.Item key={country.value} value={country.value}>
+            <SelectItem key={country.value} value={country.value}>
               {country.label}
-            </Select.Item>
+            </SelectItem>
           ))}
-        </Select.Content>
+        </SelectContent>
       </Select>
 
       {/* Filled Variant */}
@@ -70,13 +70,13 @@ export function SelectVariantsExample() {
         value={filled}
         onValueChange={setFilled}
       >
-        <Select.Content>
+        <SelectContent>
           {countries.map((country) => (
-            <Select.Item key={country.value} value={country.value}>
+            <SelectItem key={country.value} value={country.value}>
               {country.label}
-            </Select.Item>
+            </SelectItem>
           ))}
-        </Select.Content>
+        </SelectContent>
       </Select>
 
       {/* Underlined Variant */}
@@ -87,13 +87,13 @@ export function SelectVariantsExample() {
         value={underlined}
         onValueChange={setUnderlined}
       >
-        <Select.Content>
+        <SelectContent>
           {countries.map((country) => (
-            <Select.Item key={country.value} value={country.value}>
+            <SelectItem key={country.value} value={country.value}>
               {country.label}
-            </Select.Item>
+            </SelectItem>
           ))}
-        </Select.Content>
+        </SelectContent>
       </Select>
     </div>
   );
@@ -113,11 +113,11 @@ export function SelectStatesExample() {
         onValueChange={setValue}
         description="This is a normal select field"
       >
-        <Select.Content>
-          <Select.Item value="option1">Option 1</Select.Item>
-          <Select.Item value="option2">Option 2</Select.Item>
-          <Select.Item value="option3">Option 3</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+          <SelectItem value="option2">Option 2</SelectItem>
+          <SelectItem value="option3">Option 3</SelectItem>
+        </SelectContent>
       </Select>
 
       {/* Success State */}
@@ -128,11 +128,11 @@ export function SelectStatesExample() {
         defaultValue="option1"
         description="This field has been validated successfully"
       >
-        <Select.Content>
-          <Select.Item value="option1">Option 1</Select.Item>
-          <Select.Item value="option2">Option 2</Select.Item>
-          <Select.Item value="option3">Option 3</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+          <SelectItem value="option2">Option 2</SelectItem>
+          <SelectItem value="option3">Option 3</SelectItem>
+        </SelectContent>
       </Select>
 
       {/* Warning State */}
@@ -142,11 +142,11 @@ export function SelectStatesExample() {
         placeholder="Select an option..."
         description="Please review your selection"
       >
-        <Select.Content>
-          <Select.Item value="option1">Option 1</Select.Item>
-          <Select.Item value="option2">Option 2</Select.Item>
-          <Select.Item value="option3">Option 3</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+          <SelectItem value="option2">Option 2</SelectItem>
+          <SelectItem value="option3">Option 3</SelectItem>
+        </SelectContent>
       </Select>
 
       {/* Error State */}
@@ -157,11 +157,11 @@ export function SelectStatesExample() {
         errorMessage="This field is required"
         required
       >
-        <Select.Content>
-          <Select.Item value="option1">Option 1</Select.Item>
-          <Select.Item value="option2">Option 2</Select.Item>
-          <Select.Item value="option3">Option 3</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+          <SelectItem value="option2">Option 2</SelectItem>
+          <SelectItem value="option3">Option 3</SelectItem>
+        </SelectContent>
       </Select>
 
       {/* Disabled State */}
@@ -170,11 +170,11 @@ export function SelectStatesExample() {
         placeholder="Cannot select..."
         disabled
       >
-        <Select.Content>
-          <Select.Item value="option1">Option 1</Select.Item>
-          <Select.Item value="option2">Option 2</Select.Item>
-          <Select.Item value="option3">Option 3</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+          <SelectItem value="option2">Option 2</SelectItem>
+          <SelectItem value="option3">Option 3</SelectItem>
+        </SelectContent>
       </Select>
     </div>
   );
@@ -203,13 +203,13 @@ export function SelectSizesExample() {
         value={small}
         onValueChange={setSmall}
       >
-        <Select.Content>
+        <SelectContent>
           {priorities.map((priority) => (
-            <Select.Item key={priority.value} value={priority.value}>
+            <SelectItem key={priority.value} value={priority.value}>
               {priority.label}
-            </Select.Item>
+            </SelectItem>
           ))}
-        </Select.Content>
+        </SelectContent>
       </Select>
 
       {/* Medium Size */}
@@ -220,13 +220,13 @@ export function SelectSizesExample() {
         value={medium}
         onValueChange={setMedium}
       >
-        <Select.Content>
+        <SelectContent>
           {priorities.map((priority) => (
-            <Select.Item key={priority.value} value={priority.value}>
+            <SelectItem key={priority.value} value={priority.value}>
               {priority.label}
-            </Select.Item>
+            </SelectItem>
           ))}
-        </Select.Content>
+        </SelectContent>
       </Select>
 
       {/* Large Size */}
@@ -237,13 +237,13 @@ export function SelectSizesExample() {
         value={large}
         onValueChange={setLarge}
       >
-        <Select.Content>
+        <SelectContent>
           {priorities.map((priority) => (
-            <Select.Item key={priority.value} value={priority.value}>
+            <SelectItem key={priority.value} value={priority.value}>
               {priority.label}
-            </Select.Item>
+            </SelectItem>
           ))}
-        </Select.Content>
+        </SelectContent>
       </Select>
     </div>
   );
@@ -262,36 +262,36 @@ export function AdvancedSelectExample() {
         onValueChange={setValue}
         description="Pick your preferred technology stack"
       >
-        <Select.Content>
+        <SelectContent>
           {/* Frontend Technologies */}
           <div className="px-2 py-1.5 text-xs font-semibold text-on-muted">
             Frontend
           </div>
-          <Select.Item value="react">React</Select.Item>
-          <Select.Item value="vue">Vue.js</Select.Item>
-          <Select.Item value="angular">Angular</Select.Item>
-          <Select.Item value="svelte">Svelte</Select.Item>
+          <SelectItem value="react">React</SelectItem>
+          <SelectItem value="vue">Vue.js</SelectItem>
+          <SelectItem value="angular">Angular</SelectItem>
+          <SelectItem value="svelte">Svelte</SelectItem>
 
           {/* Backend Technologies */}
           <div className="border-t border-border my-1"></div>
           <div className="px-2 py-1.5 text-xs font-semibold text-on-muted">
             Backend
           </div>
-          <Select.Item value="nodejs">Node.js</Select.Item>
-          <Select.Item value="python">Python</Select.Item>
-          <Select.Item value="java">Java</Select.Item>
-          <Select.Item value="golang">Go</Select.Item>
+          <SelectItem value="nodejs">Node.js</SelectItem>
+          <SelectItem value="python">Python</SelectItem>
+          <SelectItem value="java">Java</SelectItem>
+          <SelectItem value="golang">Go</SelectItem>
 
           {/* Databases */}
           <div className="border-t border-border my-1"></div>
           <div className="px-2 py-1.5 text-xs font-semibold text-on-muted">
             Database
           </div>
-          <Select.Item value="postgresql">PostgreSQL</Select.Item>
-          <Select.Item value="mongodb">MongoDB</Select.Item>
-          <Select.Item value="mysql">MySQL</Select.Item>
-          <Select.Item value="redis">Redis</Select.Item>
-        </Select.Content>
+          <SelectItem value="postgresql">PostgreSQL</SelectItem>
+          <SelectItem value="mongodb">MongoDB</SelectItem>
+          <SelectItem value="mysql">MySQL</SelectItem>
+          <SelectItem value="redis">Redis</SelectItem>
+        </SelectContent>
       </Select>
     </div>
   );
@@ -321,12 +321,12 @@ export function SelectFormExample() {
         onValueChange={handleChange("category")}
         required
       >
-        <Select.Content>
-          <Select.Item value="bug">Bug Report</Select.Item>
-          <Select.Item value="feature">Feature Request</Select.Item>
-          <Select.Item value="improvement">Improvement</Select.Item>
-          <Select.Item value="documentation">Documentation</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="bug">Bug Report</SelectItem>
+          <SelectItem value="feature">Feature Request</SelectItem>
+          <SelectItem value="improvement">Improvement</SelectItem>
+          <SelectItem value="documentation">Documentation</SelectItem>
+        </SelectContent>
       </Select>
 
       <Select
@@ -336,12 +336,12 @@ export function SelectFormExample() {
         onValueChange={handleChange("priority")}
         required
       >
-        <Select.Content>
-          <Select.Item value="low">🟢 Low</Select.Item>
-          <Select.Item value="medium">🟡 Medium</Select.Item>
-          <Select.Item value="high">🟠 High</Select.Item>
-          <Select.Item value="urgent">🔴 Urgent</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="low">🟢 Low</SelectItem>
+          <SelectItem value="medium">🟡 Medium</SelectItem>
+          <SelectItem value="high">🟠 High</SelectItem>
+          <SelectItem value="urgent">🔴 Urgent</SelectItem>
+        </SelectContent>
       </Select>
 
       <Select
@@ -350,12 +350,12 @@ export function SelectFormExample() {
         value={formData.assignee}
         onValueChange={handleChange("assignee")}
       >
-        <Select.Content>
-          <Select.Item value="john">John Doe</Select.Item>
-          <Select.Item value="jane">Jane Smith</Select.Item>
-          <Select.Item value="mike">Mike Johnson</Select.Item>
-          <Select.Item value="sarah">Sarah Wilson</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="john">John Doe</SelectItem>
+          <SelectItem value="jane">Jane Smith</SelectItem>
+          <SelectItem value="mike">Mike Johnson</SelectItem>
+          <SelectItem value="sarah">Sarah Wilson</SelectItem>
+        </SelectContent>
       </Select>
 
       <Select
@@ -365,12 +365,12 @@ export function SelectFormExample() {
         onValueChange={handleChange("status")}
         defaultValue="todo"
       >
-        <Select.Content>
-          <Select.Item value="todo">📝 To Do</Select.Item>
-          <Select.Item value="inprogress">⚡ In Progress</Select.Item>
-          <Select.Item value="review">👀 In Review</Select.Item>
-          <Select.Item value="done">✅ Done</Select.Item>
-        </Select.Content>
+        <SelectContent>
+          <SelectItem value="todo">📝 To Do</SelectItem>
+          <SelectItem value="inprogress">⚡ In Progress</SelectItem>
+          <SelectItem value="review">👀 In Review</SelectItem>
+          <SelectItem value="done">✅ Done</SelectItem>
+        </SelectContent>
       </Select>
 
       <div className="pt-4 border-t border-border">

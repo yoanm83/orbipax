@@ -1,0 +1,468 @@
+/* OrbiPax Global Styles - Tailwind v4 Normalized */
+/* Single source of truth: @theme tokens + @layer organization */
+/* No CSS outside layers - all properly cascaded */
+
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap');
+
+/* =======================================================================
+   TAILWIND V4 DESIGN TOKENS - SINGLE SOURCE OF TRUTH
+   ======================================================================= */
+
+@theme {
+  /* Semantic Colors - HSL values for Tailwind v4 */
+  --color-bg: hsl(0 0% 100%);
+  --color-fg: hsl(240 10% 3.9%);
+  --color-card: hsl(0 0% 100%);
+  --color-border: hsl(210 20% 93%);
+  --color-ring: hsl(221 83% 53%);
+  --color-primary: hsl(221 83% 53%);
+  --color-on-primary: hsl(0 0% 100%);
+  --color-muted: hsl(240 5% 96%);
+  --color-on-muted: hsl(240 4% 46%);
+  --color-error: hsl(0 84% 60%);
+  --color-success: hsl(142 76% 36%);
+  --color-warning: hsl(38 92% 50%);
+
+  /* Radius tokens */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Typography Scale - Fluid responsive sizes */
+  --font-size-display-xl: clamp(3.5rem, 4vw + 2rem, 6rem);
+  --font-size-display-l: clamp(2.75rem, 3vw + 1.5rem, 4.5rem);
+  --font-size-display-m: clamp(2.25rem, 2.5vw + 1rem, 3.5rem);
+  --font-size-display-s: clamp(1.875rem, 2vw + 0.75rem, 2.75rem);
+  --font-size-headline-h1: clamp(2rem, 1.5vw + 1.25rem, 2.5rem);
+  --font-size-headline-h2: clamp(1.75rem, 1.25vw + 1rem, 2.125rem);
+  --font-size-headline-h3: clamp(1.5rem, 1vw + 0.875rem, 1.875rem);
+  --font-size-headline-h4: clamp(1.25rem, 0.75vw + 0.75rem, 1.5rem);
+  --font-size-headline-h5: clamp(1.125rem, 0.5vw + 0.75rem, 1.25rem);
+  --font-size-headline-h6: clamp(1rem, 0.25vw + 0.875rem, 1.125rem);
+  --font-size-title-l: clamp(1.25rem, 0.5vw + 1rem, 1.5rem);
+  --font-size-title-m: clamp(1.125rem, 0.25vw + 1rem, 1.25rem);
+  --font-size-title-s: clamp(1rem, 0.125vw + 0.9375rem, 1.125rem);
+  --font-size-body-l: clamp(1.125rem, 0.25vw + 1rem, 1.25rem);
+  --font-size-body-m: clamp(1rem, 0.125vw + 0.9375rem, 1.125rem);
+  --font-size-body-s: clamp(0.875rem, 0.125vw + 0.8125rem, 1rem);
+  --font-size-label-l: clamp(1rem, 0.125vw + 0.9375rem, 1.125rem);
+  --font-size-label-m: clamp(0.875rem, 0.125vw + 0.8125rem, 1rem);
+  --font-size-label-s: clamp(0.75rem, 0.125vw + 0.6875rem, 0.875rem);
+  --font-size-caption-l: clamp(0.875rem, 0.125vw + 0.8125rem, 1rem);
+  --font-size-caption-m: clamp(0.75rem, 0.125vw + 0.6875rem, 0.875rem);
+  --font-size-caption-s: clamp(0.6875rem, 0.0625vw + 0.65625rem, 0.75rem);
+}
+
+/* Official Plugins (v4) */
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+/* =======================================================================
+   LAYER BASE - BROWSER RESETS & FUNDAMENTAL STYLES
+   ======================================================================= */
+
+@layer base {
+  /* Custom Properties - OKLCH values for advanced color mixing */
+  :root {
+    /* OKLCH tokens for color-mix() and better color science */
+    --bg: oklch(98% 0.01 89);
+    --fg: oklch(15% 0.02 89);
+    --muted: oklch(95% 0.01 89);
+    --muted-fg: oklch(45% 0.02 89);
+    --primary: oklch(47% 0.15 240);
+    --primary-fg: oklch(98% 0.01 240);
+    --accent: oklch(85% 0.08 150);
+    --accent-fg: oklch(20% 0.05 150);
+    --destructive: oklch(55% 0.18 25);
+    --destructive-fg: oklch(98% 0.01 25);
+    --border: oklch(88% 0.02 89);
+    --ring: oklch(47% 0.15 240);
+    --focus: oklch(47% 0.15 240);
+
+    /* Brand color tokens - OKLCH semantic */
+    --google-blue: oklch(55% 0.18 250);
+    --google-green: oklch(65% 0.15 140);
+    --google-yellow: oklch(80% 0.12 85);
+    --google-red: oklch(58% 0.20 25);
+    --microsoft-red: oklch(60% 0.18 25);
+    --microsoft-green: oklch(70% 0.15 120);
+    --microsoft-blue: oklch(65% 0.18 220);
+    --microsoft-yellow: oklch(75% 0.15 80);
+
+    /* Legacy typography tokens for backward compatibility */
+    --step--1: var(--font-size-caption-s);
+    --step-0: var(--font-size-body-m);
+    --step-1: var(--font-size-title-m);
+    --step-2: var(--font-size-headline-h2);
+
+    /* === PRIMITIVE TOKEN MAPPINGS === */
+    /* P0 - Critical (Blocks Rendering) */
+    /* Background tokens */
+    --bg-popover: var(--bg);
+    --bg-card: var(--bg);
+    --bg-muted: var(--muted);
+    --bg-primary: var(--primary);
+    --bg-bg: var(--bg);
+
+    /* Text/Foreground tokens */
+    --text-popover-foreground: var(--fg);
+    --text-muted-foreground: var(--muted-fg);
+    --text-primary-foreground: var(--primary-fg);
+    --text-foreground: var(--fg);
+    --text-fg: var(--fg);
+    --text-on-primary: var(--primary-fg);
+    --text-on-muted: var(--muted-fg);
+
+    /* P1 - Important (Degrades Styling) */
+    /* Ring/Border tokens */
+    --ring-primary: var(--primary);
+    --ring-ring: var(--ring);
+    --border-primary: var(--primary);
+    --border-border: var(--border);
+    --border-error: var(--destructive);
+    --border-success: oklch(65% 0.15 140);
+    --border-warning: oklch(80% 0.12 85);
+
+    /* Accent tokens */
+    --bg-accent: var(--accent);
+    --text-accent-foreground: var(--accent-fg);
+
+    /* Status background tokens */
+    --bg-success: oklch(65% 0.15 140);
+    --bg-warning: oklch(80% 0.12 85);
+    --bg-error: var(--destructive);
+  }
+
+  /* Dark mode OKLCH overrides */
+  .dark {
+    --bg: oklch(12% 0.01 89);
+    --fg: oklch(95% 0.01 89);
+    --muted: oklch(18% 0.01 89);
+    --muted-fg: oklch(65% 0.02 89);
+    --primary: oklch(65% 0.15 240);
+    --primary-fg: oklch(12% 0.01 240);
+    --accent: oklch(75% 0.08 150);
+    --accent-fg: oklch(12% 0.01 150);
+    --destructive: oklch(65% 0.18 25);
+    --destructive-fg: oklch(12% 0.01 25);
+    --border: oklch(25% 0.02 89);
+    --ring: oklch(65% 0.15 240);
+    --focus: oklch(65% 0.15 240);
+
+    /* === DARK MODE PRIMITIVE TOKEN MAPPINGS === */
+    /* P0 - Critical (Blocks Rendering) */
+    /* Background tokens */
+    --bg-popover: var(--bg);
+    --bg-card: var(--bg);
+    --bg-muted: var(--muted);
+    --bg-primary: var(--primary);
+    --bg-bg: var(--bg);
+
+    /* Text/Foreground tokens */
+    --text-popover-foreground: var(--fg);
+    --text-muted-foreground: var(--muted-fg);
+    --text-primary-foreground: var(--primary-fg);
+    --text-foreground: var(--fg);
+    --text-fg: var(--fg);
+    --text-on-primary: var(--primary-fg);
+    --text-on-muted: var(--muted-fg);
+
+    /* P1 - Important (Degrades Styling) */
+    /* Ring/Border tokens */
+    --ring-primary: var(--primary);
+    --ring-ring: var(--ring);
+    --border-primary: var(--primary);
+    --border-border: var(--border);
+    --border-error: var(--destructive);
+    --border-success: oklch(65% 0.15 140);
+    --border-warning: oklch(80% 0.12 85);
+
+    /* Accent tokens */
+    --bg-accent: var(--accent);
+    --text-accent-foreground: var(--accent-fg);
+
+    /* Status background tokens */
+    --bg-success: oklch(65% 0.15 140);
+    --bg-warning: oklch(80% 0.12 85);
+    --bg-error: var(--destructive);
+  }
+
+  /* Universal box-sizing reset */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Root element enhancements */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Body defaults with semantic tokens */
+  html, body {
+    font-family: 'Manrope', sans-serif !important;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: 'Manrope', sans-serif !important;
+    font-size: var(--step-0);
+    line-height: 1.5;
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Focus styles - WCAG 2.2 AA compliant with accessible ring */
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Enhanced focus for interactive elements with accessible ring */
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Inputs handle focus via rings */
+  input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Prevent browser border-radius overrides */
+  input[type="email"]:focus,
+  input[type="email"]:active,
+  input[type="email"]:focus-visible,
+  input[type="password"]:focus,
+  input[type="password"]:active,
+  input[type="password"]:focus-visible,
+  input[type="text"]:focus,
+  input[type="text"]:active,
+  input[type="text"]:focus-visible {
+    border-radius: 0.5rem !important;
+  }
+
+  /* Interactive element defaults */
+  button,
+  [role="button"] {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+  }
+
+  button:focus,
+  button:active,
+  [role="button"]:focus,
+  [role="button"]:active {
+    outline: none;
+    box-shadow: none;
+    border: none;
+  }
+
+  /* Keep focus-visible separate for accessibility */
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    box-shadow: none;
+    border: none;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  /* Link accessibility baseline */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Allow styled links to keep their colors */
+  a[class*="text-"] {
+    color: unset;
+  }
+
+  a:hover,
+  a:focus {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+  }
+
+  /* Override for links that explicitly don't want underlines */
+  a.no-underline:hover,
+  a.no-underline:focus {
+    text-decoration: none !important;
+  }
+
+  /* Checkbox styling - ensure visibility with semantic tokens */
+  input[type="checkbox"] {
+    appearance: none;
+    background-color: var(--muted);
+    border-radius: 0.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  input[type="checkbox"]:checked {
+    background-color: var(--primary);
+  }
+
+  input[type="checkbox"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.375rem;
+    height: 0.25rem;
+    border: 2px solid var(--primary-fg);
+    border-top: none;
+    border-right: none;
+    transform: translate(-50%, -60%) rotate(-45deg);
+  }
+
+  input[type="checkbox"]:focus,
+  input[type="checkbox"]:active {
+    outline: none;
+    box-shadow: none;
+    border: none;
+  }
+
+  input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    box-shadow: none;
+    border: none;
+  }
+
+  input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* =======================================================================
+   LAYER COMPONENTS - REUSABLE COMPONENT PATTERNS
+   ======================================================================= */
+
+@layer components {
+  /* Prose styling with semantic tokens */
+  .prose-muted {
+    color: color-mix(in oklab, var(--fg), transparent 40%);
+  }
+
+  /* Typography component classes using @theme tokens */
+  .text-display-xl { font-size: var(--font-size-display-xl); }
+  .text-display-l { font-size: var(--font-size-display-l); }
+  .text-display-m { font-size: var(--font-size-display-m); }
+  .text-display-s { font-size: var(--font-size-display-s); }
+  .text-headline-h1 { font-size: var(--font-size-headline-h1); }
+  .text-headline-h2 { font-size: var(--font-size-headline-h2); }
+  .text-headline-h3 { font-size: var(--font-size-headline-h3); }
+  .text-headline-h4 { font-size: var(--font-size-headline-h4); }
+  .text-headline-h5 { font-size: var(--font-size-headline-h5); }
+  .text-headline-h6 { font-size: var(--font-size-headline-h6); }
+}
+
+/* =======================================================================
+   LAYER UTILITIES - CUSTOM UTILITY CLASSES
+   ======================================================================= */
+
+@utility sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@utility container-safe {
+  width: 100%;
+  max-width: 2400px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @media (min-width: 640px) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  @media (min-width: 1280px) {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+
+  @media (min-width: 1600px) {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+
+  @media (min-width: 1920px) {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+
+  @media (min-width: 2560px) {
+    padding-left: 10rem;
+    padding-right: 10rem;
+  }
+}
+
+@utility kbd {
+  background-color: var(--muted);
+  color: var(--muted-fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+}

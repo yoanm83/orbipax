@@ -1,11 +1,12 @@
 'use client'
 
+import { useState } from "react"
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
 import { Input } from "@/shared/ui/primitives/Input"
 import { Label } from "@/shared/ui/primitives/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
+import { DatePicker } from "@/shared/ui/primitives/DatePicker"
 import { User, ChevronUp, ChevronDown } from "lucide-react"
-// TODO: Replace with proper multi-select from our primitives
-// TODO: Replace with proper calendar from our primitives
 // TODO: Replace with server-driven form state
 
 interface PersonalInfoSectionProps {
@@ -15,17 +16,45 @@ interface PersonalInfoSectionProps {
 
 export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInfoSectionProps) {
   // TODO: Replace with server-driven form state
-  const personalInfo = {
+  const [personalInfo, setPersonalInfo] = useState<{
+    fullName: string;
+    firstName: string;
+    lastName: string;
+    preferredName: string;
+    dateOfBirth: Date | null;
+    genderIdentity: string;
+    sexAssignedAtBirth: string;
+    race: string;
+    races: string[];
+    ethnicity: string;
+    primaryLanguage: string;
+    preferredCommunication: string;
+    veteranStatus: string;
+    maritalStatus: string;
+    ssn: string;
+    photoPreview: string;
+  }>({
     fullName: '',
+    firstName: '',
+    lastName: '',
+    preferredName: '',
     dateOfBirth: null,
-    gender: '',
-    pronouns: '',
-    languages: [],
-    race: []
-  }
+    genderIdentity: '',
+    sexAssignedAtBirth: '',
+    race: '',
+    races: [],
+    ethnicity: '',
+    primaryLanguage: '',
+    preferredCommunication: '',
+    veteranStatus: '',
+    maritalStatus: '',
+    ssn: '',
+    photoPreview: ''
+  })
 
   const handlePersonalInfoChange = (data: any) => {
     // TODO: Replace with server-driven form handling
+    setPersonalInfo(prev => ({ ...prev, ...data }))
     console.log('Personal info change:', data)
   }
 
@@ -66,7 +95,7 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInf
   }
 
   return (
-    <Card className="w-full mb-6">
+    <Card className="w-full rounded-2xl shadow-md mb-6">
       <div
         className="p-6 flex justify-between items-center cursor-pointer"
         onClick={onSectionToggle}
@@ -75,7 +104,7 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInf
         aria-expanded={isExpanded}
       >
         <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-primary" />
+          <User className="h-5 w-5 text-primary" style={{ color: 'var(--legacy-primary)' }} />
           <h2 className="text-xl font-semibold">Personal Information</h2>
         </div>
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -118,49 +147,213 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInf
             </div>
           </div>
 
-          {/* Form Fields */}
-          <div className="space-y-4">
+          {/* Form Fields - All 12 fields as per Legacy */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Field 1: First Name */}
             <div>
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="firstName" required>First Name</Label>
               <Input
-                id="fullName"
-                value={personalInfo.fullName}
-                onChange={(e) => handlePersonalInfoChange({ fullName: e.target.value })}
-                placeholder="Enter full name"
+                id="firstName"
+                value={personalInfo.firstName}
+                onChange={(e) => handlePersonalInfoChange({ firstName: e.target.value })}
+                placeholder="Enter your first name"
                 className="mt-1"
+                required
               />
             </div>
 
+            {/* Field 2: Last Name */}
             <div>
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Label htmlFor="lastName" required>Last Name</Label>
               <Input
-                id="dateOfBirth"
-                type="date"
-                value={personalInfo.dateOfBirth || ''}
-                onChange={(e) => handlePersonalInfoChange({ dateOfBirth: e.target.value })}
+                id="lastName"
+                value={personalInfo.lastName}
+                onChange={(e) => handlePersonalInfoChange({ lastName: e.target.value })}
+                placeholder="Enter your last name"
                 className="mt-1"
+                required
               />
             </div>
 
+            {/* Field 3: Date of Birth */}
             <div>
-              <Label htmlFor="race">Race/Ethnicity</Label>
-              <Input
-                id="race"
-                placeholder="Enter race/ethnicity (TODO: Replace with multi-select)"
-                value={personalInfo.race.join(', ')}
-                onChange={(e) => handlePersonalInfoChange({ race: e.target.value.split(', ') })}
+              <Label htmlFor="dob" required>Date of Birth</Label>
+              <DatePicker
+                id="dob"
+                date={personalInfo.dateOfBirth || undefined}
+                onSelect={(date) => handlePersonalInfoChange({ dateOfBirth: date || null })}
+                placeholder="Select date"
                 className="mt-1"
+                required
+                maxDate={(() => {
+                  const today = new Date();
+                  today.setHours(23, 59, 59, 999);
+                  return today;
+                })()}
+                minDate={new Date('1900-01-01')}
               />
             </div>
 
+            {/* Field 4: Gender */}
             <div>
-              <Label htmlFor="languages">Languages</Label>
+              <Label htmlFor="genderIdentity" required>Gender</Label>
+              <Select
+                value={personalInfo.genderIdentity}
+                onValueChange={(value) => handlePersonalInfoChange({ genderIdentity: value })}
+              >
+                <SelectTrigger id="genderIdentity" className="mt-1">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="non-binary">Non-binary</SelectItem>
+                  <SelectItem value="transgender-male">Transgender Male</SelectItem>
+                  <SelectItem value="transgender-female">Transgender Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 5: Race */}
+            <div>
+              <Label htmlFor="race" required>Race</Label>
+              <Select
+                value={personalInfo.race}
+                onValueChange={(value) => handlePersonalInfoChange({ race: value })}
+              >
+                <SelectTrigger id="race" className="mt-1">
+                  <SelectValue placeholder="Select race" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="white">White</SelectItem>
+                  <SelectItem value="black">Black or African American</SelectItem>
+                  <SelectItem value="asian">Asian</SelectItem>
+                  <SelectItem value="native">American Indian or Alaska Native</SelectItem>
+                  <SelectItem value="pacific_islander">Native Hawaiian or Pacific Islander</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 6: Ethnicity */}
+            <div>
+              <Label htmlFor="ethnicity" required>Ethnicity</Label>
+              <Select
+                value={personalInfo.ethnicity}
+                onValueChange={(value) => handlePersonalInfoChange({ ethnicity: value })}
+              >
+                <SelectTrigger id="ethnicity" className="mt-1">
+                  <SelectValue placeholder="Select ethnicity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hispanic">Hispanic or Latino</SelectItem>
+                  <SelectItem value="not-hispanic">Not Hispanic or Latino</SelectItem>
+                  <SelectItem value="unknown">Unknown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 7: Primary Language */}
+            <div>
+              <Label htmlFor="language" required>Primary Language</Label>
+              <Select
+                value={personalInfo.primaryLanguage}
+                onValueChange={(value) => handlePersonalInfoChange({ primaryLanguage: value })}
+              >
+                <SelectTrigger id="language" className="mt-1">
+                  <SelectValue placeholder="Select primary language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="spanish">Spanish</SelectItem>
+                  <SelectItem value="haitian_creole">Haitian Creole</SelectItem>
+                  <SelectItem value="portuguese">Portuguese</SelectItem>
+                  <SelectItem value="french">French</SelectItem>
+                  <SelectItem value="mandarin">Mandarin</SelectItem>
+                  <SelectItem value="cantonese">Cantonese</SelectItem>
+                  <SelectItem value="vietnamese">Vietnamese</SelectItem>
+                  <SelectItem value="arabic">Arabic</SelectItem>
+                  <SelectItem value="russian">Russian</SelectItem>
+                  <SelectItem value="asl">American Sign Language</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 8: Preferred Communication Method */}
+            <div>
+              <Label htmlFor="preferredCommunication" required>Preferred Communication Method</Label>
+              <Select
+                value={personalInfo.preferredCommunication}
+                onValueChange={(value) => handlePersonalInfoChange({ preferredCommunication: value })}
+              >
+                <SelectTrigger id="preferredCommunication" className="mt-1">
+                  <SelectValue placeholder="Select preferred method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="text">Text Message</SelectItem>
+                  <SelectItem value="mail">Mail</SelectItem>
+                  <SelectItem value="in-person">In Person</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 9: Veteran Status */}
+            <div>
+              <Label htmlFor="veteranStatus">Veteran Status</Label>
+              <Select
+                value={personalInfo.veteranStatus}
+                onValueChange={(value) => handlePersonalInfoChange({ veteranStatus: value })}
+              >
+                <SelectTrigger id="veteranStatus" className="mt-1">
+                  <SelectValue placeholder="Select veteran status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yes">Yes</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                  <SelectItem value="unknown">Unknown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 10: Marital Status */}
+            <div>
+              <Label htmlFor="maritalStatus">Marital Status</Label>
+              <Select
+                value={personalInfo.maritalStatus}
+                onValueChange={(value) => handlePersonalInfoChange({ maritalStatus: value })}
+              >
+                <SelectTrigger id="maritalStatus" className="mt-1">
+                  <SelectValue placeholder="Select marital status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                  <SelectItem value="separated">Separated</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Field 11: Social Security Number */}
+            <div>
+              <Label htmlFor="ssn" required>Social Security Number</Label>
               <Input
-                id="languages"
-                placeholder="Enter languages spoken (TODO: Replace with multi-select)"
-                value={personalInfo.languages.join(', ')}
-                onChange={(e) => handlePersonalInfoChange({ languages: e.target.value.split(', ') })}
+                id="ssn"
+                type="password"
+                value={personalInfo.ssn}
+                onChange={(e) => handlePersonalInfoChange({ ssn: e.target.value })}
+                placeholder="XXX-XX-XXXX"
                 className="mt-1"
+                required
+                maxLength={11}
               />
             </div>
           </div>

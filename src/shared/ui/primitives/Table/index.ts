@@ -1,0 +1,28 @@
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+  TablePagination,
+  // Specialized cells
+  TableCellPlate,
+  TableCellVehicleInfo,
+  TableCellMeta,
+  TableCellBadge,
+  TableCellAction,
+  TableCellStatus,
+  TableButton,
+  TableCellResponsive,
+  // Types
+  type TableProps,
+  type TableHeaderProps,
+  type TableBodyProps,
+  type TableRowProps,
+  type TableHeadProps,
+  type TableCellProps,
+  type TablePaginationProps,
+} from "./table"

@@ -8,41 +8,39 @@ import { AddressSection } from "./AddressSection"
 import { ContactSection } from "./ContactSection"
 import { LegalSection } from "./LegalSection"
 import { PersonalInfoSection } from "./PersonalInfoSection"
+import { Step1SkinScope } from "./Step1SkinScope"
 
 export function IntakeWizardStep1Demographics() {
   const expandedSections = useStep1ExpandedSections()
   const { toggleSection } = useStep1UIStore()
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-fg mb-2">
-          Demographics Information
-        </h1>
-        <p className="text-on-muted">
-          Please provide your personal demographic information below.
-        </p>
+    <Step1SkinScope>
+      <div className="flex-1 w-full p-6">
+        {/* Header removed to match Legacy - sections have their own headers */}
+
+        <div className="space-y-6">
+          <PersonalInfoSection
+            onSectionToggle={() => toggleSection('personal')}
+            isExpanded={expandedSections.personal}
+          />
+
+          <AddressSection
+            onSectionToggle={() => toggleSection('address')}
+            isExpanded={expandedSections.address}
+          />
+
+          <ContactSection
+            onSectionToggle={() => toggleSection('contact')}
+            isExpanded={expandedSections.contact}
+          />
+
+          <LegalSection
+            onSectionToggle={() => toggleSection('legal')}
+            isExpanded={expandedSections.legal}
+          />
+        </div>
       </div>
-
-      <PersonalInfoSection
-        onSectionToggle={() => toggleSection('personal')}
-        isExpanded={expandedSections.personal}
-      />
-
-      <AddressSection
-        onSectionToggle={() => toggleSection('address')}
-        isExpanded={expandedSections.address}
-      />
-
-      <ContactSection
-        onSectionToggle={() => toggleSection('contact')}
-        isExpanded={expandedSections.contact}
-      />
-
-      <LegalSection
-        onSectionToggle={() => toggleSection('legal')}
-        isExpanded={expandedSections.legal}
-      />
-    </div>
+    </Step1SkinScope>
   )
 }
