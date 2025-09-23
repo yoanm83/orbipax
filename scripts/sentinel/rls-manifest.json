@@ -1,0 +1,339 @@
+{
+  "description": "OrbiPax Health - Row Level Security (RLS) and Multi-tenancy Manifest",
+  "version": "1.1",
+  "compliance_framework": "HIPAA",
+  "tenant_model": "Organization-based multi-tenancy",
+  "required_filters": {
+    "organization_id": {
+      "description": "Primary tenant boundary for all clinical data",
+      "tables": [
+        "patients",
+        "appointments",
+        "notes",
+        "assessments",
+        "treatments",
+        "medications",
+        "allergies",
+        "diagnoses",
+        "vitals",
+        "documents",
+        "care_plans",
+        "prescriptions",
+        "lab_results",
+        "imaging_results",
+        "insurance_claims",
+        "billing_records"
+      ],
+      "enforcement_level": "strict",
+      "violation_severity": "critical",
+      "alternative_names": [
+        "organizationId",
+        "org_id",
+        "orgId",
+        "tenant_id",
+        "tenantId"
+      ]
+    },
+    "provider_id": {
+      "description": "Provider-level access control for clinical data",
+      "tables": [
+        "notes",
+        "assessments",
+        "treatments",
+        "prescriptions",
+        "care_plans",
+        "provider_schedules",
+        "provider_notes"
+      ],
+      "enforcement_level": "moderate",
+      "violation_severity": "high",
+      "alternative_names": [
+        "providerId",
+        "clinician_id",
+        "clinicianId",
+        "therapist_id",
+        "therapistId"
+      ]
+    },
+    "patient_id": {
+      "description": "Patient-specific data access control",
+      "tables": [
+        "appointments",
+        "notes",
+        "assessments",
+        "treatments",
+        "medications",
+        "allergies",
+        "diagnoses",
+        "vitals",
+        "documents",
+        "care_plans",
+        "prescriptions",
+        "lab_results",
+        "imaging_results"
+      ],
+      "enforcement_level": "strict",
+      "violation_severity": "critical",
+      "alternative_names": [
+        "patientId",
+        "client_id",
+        "clientId",
+        "member_id",
+        "memberId"
+      ]
+    },
+    "facility_id": {
+      "description": "Facility-level access control for location-based data",
+      "tables": [
+        "appointments",
+        "provider_schedules",
+        "facility_resources",
+        "equipment_logs"
+      ],
+      "enforcement_level": "moderate",
+      "violation_severity": "medium",
+      "alternative_names": [
+        "facilityId",
+        "location_id",
+        "locationId",
+        "site_id",
+        "siteId"
+      ]
+    }
+  },
+  "clinical_entities": {
+    "phi_protected": [
+      "patients",
+      "appointments",
+      "notes",
+      "assessments",
+      "treatments",
+      "medications",
+      "allergies",
+      "diagnoses",
+      "vitals",
+      "documents",
+      "care_plans",
+      "prescriptions",
+      "lab_results",
+      "imaging_results",
+      "insurance_claims",
+      "billing_records",
+      "communications",
+      "emergency_contacts"
+    ],
+    "organizational_data": [
+      "providers",
+      "facilities",
+      "departments",
+      "services",
+      "insurance_plans",
+      "fee_schedules",
+      "authorization_rules",
+      "workflow_templates"
+    ],
+    "shared_reference": [
+      "icd_codes",
+      "cpt_codes",
+      "medication_catalog",
+      "lab_test_catalog",
+      "system_settings",
+      "lookup_tables"
+    ]
+  },
+  "database_operations": {
+    "select_queries": {
+      "required_filters": ["organization_id"],
+      "optional_filters": ["provider_id", "patient_id", "facility_id"],
+      "patterns": [
+        ".select(*).from('table_name').eq('organization_id', orgId)",
+        ".from('table_name').select('*').match({ organization_id: orgId })",
+        "WHERE organization_id = $1 AND ..."
+      ]
+    },
+    "insert_operations": {
+      "required_fields": ["organization_id"],
+      "validation": "Must include organization_id in all clinical data inserts",
+      "patterns": [
+        ".insert({ ...data, organization_id: orgId })",
+        "INSERT INTO table_name (..., organization_id) VALUES (..., $orgId)"
+      ]
+    },
+    "update_operations": {
+      "required_filters": ["organization_id"],
+      "validation": "Updates must filter by organization_id to prevent cross-tenant modification",
+      "patterns": [
+        ".update(data).eq('organization_id', orgId).eq('id', recordId)",
+        "UPDATE table_name SET ... WHERE organization_id = $1 AND id = $2"
+      ]
+    },
+    "delete_operations": {
+      "required_filters": ["organization_id"],
+      "validation": "Deletes must filter by organization_id to prevent cross-tenant deletion",
+      "soft_delete_preferred": true,
+      "patterns": [
+        ".update({ deleted_at: new Date() }).eq('organization_id', orgId)",
+        ".delete().eq('organization_id', orgId).eq('id', recordId)"
+      ]
+    }
+  },
+  "join_operations": {
+    "cross_table_joins": {
+      "requirement": "All JOINs must include organization_id matching",
+      "pattern": "JOIN table2 ON table1.id = table2.table1_id AND table1.organization_id = table2.organization_id",
+      "violation_risk": "Data leakage across organizations"
+    },
+    "allowed_joins": {
+      "same_organization": "Tables within same organization boundary",
+      "reference_data": "Joins with shared reference tables (no org filtering needed)",
+      "system_tables": "Joins with system configuration tables"
+    },
+    "forbidden_joins": {
+      "cross_organization": "Direct joins without organization_id matching",
+      "unfiltered_clinical": "Joins with clinical tables without proper filtering"
+    }
+  },
+  "helper_methods": {
+    "organization_filtering": [
+      "whereOrganization(orgId)",
+      "withOrgFilter(orgId)",
+      "filterByOrganization(orgId)",
+      "scopeToOrganization(orgId)"
+    ],
+    "multi_tenant_queries": [
+      "getTenantData(orgId, query)",
+      "queryWithOrgScope(orgId, table)",
+      "organizationScopedQuery(orgId, operation)"
+    ],
+    "rls_helpers": [
+      "enableRLS()",
+      "disableRLS()",
+      "bypassRLS()",
+      "validateRLSContext()"
+    ]
+  },
+  "exempt_operations": {
+    "system_level": [
+      "system_audit",
+      "migration",
+      "backup",
+      "analytics_aggregation",
+      "system_monitoring",
+      "health_checks"
+    ],
+    "administrative": [
+      "super_admin_operations",
+      "cross_tenant_reporting",
+      "data_migration",
+      "system_configuration"
+    ],
+    "reference_data": [
+      "lookup_table_updates",
+      "catalog_maintenance",
+      "code_system_updates"
+    ],
+    "exemption_markers": [
+      "/* @rls-exempt: system-operation */",
+      "// @bypass-rls: administrative",
+      "@exempt:rls-violation",
+      "// @multi-tenant-safe"
+    ]
+  },
+  "violation_detection": {
+    "high_risk_patterns": [
+      {
+        "pattern": "SELECT.*FROM.*(patients|appointments|notes|assessments).*(?!organization_id)",
+        "description": "Clinical data query without organization_id filter",
+        "severity": "critical"
+      },
+      {
+        "pattern": "JOIN.*(?!organization_id.*=.*organization_id)",
+        "description": "Cross-table JOIN without organization_id matching",
+        "severity": "critical"
+      },
+      {
+        "pattern": "DELETE.*FROM.*(patients|appointments|notes).*(?!organization_id)",
+        "description": "Clinical data deletion without organization_id filter",
+        "severity": "critical"
+      }
+    ],
+    "medium_risk_patterns": [
+      {
+        "pattern": "INSERT.*INTO.*(patients|appointments|notes).*(?!organization_id)",
+        "description": "Clinical data insert without organization_id",
+        "severity": "high"
+      },
+      {
+        "pattern": "UPDATE.*(patients|appointments|notes).*(?!organization_id)",
+        "description": "Clinical data update without organization_id filter",
+        "severity": "high"
+      }
+    ],
+    "rls_bypass_patterns": [
+      {
+        "pattern": "rlsDisabled|bypassRLS|\\.rls\\(false\\)",
+        "description": "Explicit RLS bypass - dangerous for PHI protection",
+        "severity": "critical"
+      }
+    ]
+  },
+  "compliance_requirements": {
+    "hipaa": {
+      "minimum_necessary": "Access only data necessary for specific business purpose",
+      "organization_isolation": "Complete isolation between different healthcare organizations",
+      "audit_trail": "All access must be logged with organization context",
+      "access_controls": "Role-based access within organization boundaries"
+    },
+    "healthcare_regulations": {
+      "patient_privacy": "Patient data access limited to authorized providers within organization",
+      "provider_licensing": "Provider access limited to their licensed jurisdiction",
+      "facility_scope": "Facility-based access controls for location-specific data"
+    }
+  },
+  "testing_guidelines": {
+    "unit_tests": [
+      "Test organization_id filtering in all clinical queries",
+      "Test cross-organization data isolation",
+      "Test RLS policy enforcement"
+    ],
+    "integration_tests": [
+      "Multi-tenant data access scenarios",
+      "Cross-organization boundary testing",
+      "Provider role-based access testing"
+    ],
+    "security_tests": [
+      "Attempt cross-organization data access",
+      "Test RLS bypass prevention",
+      "Validate audit trail completeness"
+    ]
+  },
+  "monitoring_and_alerting": {
+    "rls_violations": {
+      "real_time_alerts": "Immediate notification for RLS bypass attempts",
+      "audit_log_monitoring": "Regular review of organization_id filtering compliance",
+      "access_pattern_analysis": "Detect unusual cross-organization access patterns"
+    },
+    "compliance_metrics": {
+      "query_compliance_rate": "Percentage of queries with proper organization filtering",
+      "violation_frequency": "Number of RLS violations per time period",
+      "exemption_usage": "Tracking of legitimate RLS exemptions"
+    }
+  },
+  "remediation_guidelines": {
+    "immediate_actions": [
+      "Add organization_id filter to violating queries",
+      "Implement proper JOIN conditions with organization matching",
+      "Add validation for organization context in all clinical operations"
+    ],
+    "architectural_improvements": [
+      "Implement database-level RLS policies",
+      "Create organization-scoped query builders",
+      "Develop multi-tenant data access patterns"
+    ],
+    "long_term_strategies": [
+      "Database schema design with tenant isolation",
+      "Application-level RLS enforcement",
+      "Automated compliance testing"
+    ]
+  }
+}

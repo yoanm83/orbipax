@@ -1,7 +1,33 @@
 import { forwardRef, createContext, useContext, useId } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+// Utility function for class names
+function cn(...classes: (string | undefined | false)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
 
-// Form variant configurations based on modern 2025 patterns
+/**
+ * Form - OrbiPax Health Philosophy Compliant
+ *
+ * ACCESSIBILITY (WCAG 2.1 AA):
+ * - Proper form semantics with fieldset and legend elements
+ * - Error announcement with aria-live regions
+ * - Required field indicators for screen readers
+ * - Form validation and error state management
+ * - Keyboard navigation and focus management
+ *
+ * HEALTH DESIGN TOKENS:
+ * - Semantic color system for medical contexts
+ * - Consistent spacing scales for form density
+ * - Professional appearance for clinical settings
+ * - Clear visual hierarchy for complex forms
+ *
+ * CONTAINER QUERIES:
+ * - Responsive form layouts for medical devices
+ * - Adaptable field sizing for different viewports
+ * - Touch-friendly spacing on mobile healthcare devices
+ */
+
+// Form variant configurations based on Health Philosophy
 interface FormVariants {
   layout: "vertical" | "horizontal" | "inline";
   spacing: "sm" | "md" | "lg";
@@ -167,17 +193,27 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(
     ].filter(Boolean).join(" ");
 
     // Label classes with error state
-    const labelClasses = [
+    const labelClasses = cn(
       fieldVariants.label.base,
-      hasError ? fieldVariants.label.error : fieldVariants.label.default
-    ].join(" ");
+      hasError ? fieldVariants.label.error : fieldVariants.label.default,
+      "@container/form:(max-width:320px):text-xs",
+      "@container/form:(min-width:768px):text-base"
+    );
 
     return (
       <div ref={ref} className={fieldClasses} {...props}>
         {label && (
           <label htmlFor={fieldId} className={labelClasses}>
             {label}
-            {required && <span className="text-error ml-1">*</span>}
+            {required && (
+              <span
+                className="text-destructive ml-1 text-sm"
+                aria-label="required field"
+                role="img"
+              >
+                *
+              </span>
+            )}
           </label>
         )}
 

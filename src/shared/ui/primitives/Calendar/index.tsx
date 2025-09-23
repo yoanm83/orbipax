@@ -1,4 +1,4 @@
-import { forwardRef, createContext, useContext, useState, useCallback, useId, useEffect, useMemo } from "react";
+import { forwardRef, createContext, useContext, useState, useCallback, useId, useMemo } from "react";
 import type { ComponentPropsWithoutRef, ReactNode, KeyboardEvent } from "react";
 
 // Calendar variant configurations based on modern 2025 patterns

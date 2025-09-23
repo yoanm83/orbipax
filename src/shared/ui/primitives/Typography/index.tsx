@@ -64,19 +64,19 @@ const TypographyRoot = forwardRef<HTMLElement, BaseTypographyProps>(
 
     // Determine semantic HTML element
     const getSemanticElement = (): keyof JSX.IntrinsicElements => {
-      if (as) return as;
+      if (as) {return as;}
 
-      if (variant.startsWith("display")) return "h1";
-      if (variant === "headline-h1") return "h1";
-      if (variant === "headline-h2") return "h2";
-      if (variant === "headline-h3") return "h3";
-      if (variant === "headline-h4") return "h4";
-      if (variant === "headline-h5") return "h5";
-      if (variant === "headline-h6") return "h6";
-      if (variant.startsWith("title")) return "h3";
-      if (variant.startsWith("body")) return "p";
-      if (variant.startsWith("label")) return "span";
-      if (variant.startsWith("caption")) return "small";
+      if (variant.startsWith("display")) {return "h1";}
+      if (variant === "headline-h1") {return "h1";}
+      if (variant === "headline-h2") {return "h2";}
+      if (variant === "headline-h3") {return "h3";}
+      if (variant === "headline-h4") {return "h4";}
+      if (variant === "headline-h5") {return "h5";}
+      if (variant === "headline-h6") {return "h6";}
+      if (variant.startsWith("title")) {return "h3";}
+      if (variant.startsWith("body")) {return "p";}
+      if (variant.startsWith("label")) {return "span";}
+      if (variant.startsWith("caption")) {return "small";}
 
       return "p";
     };
@@ -124,7 +124,7 @@ const TypographyRoot = forwardRef<HTMLElement, BaseTypographyProps>(
 
     // Weight override styles
     const getWeightStyles = () => {
-      if (!weight) return "";
+      if (!weight) {return "";}
 
       const weights = {
         light: "font-light",

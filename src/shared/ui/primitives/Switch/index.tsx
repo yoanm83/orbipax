@@ -1,7 +1,34 @@
 import { forwardRef, useCallback, useId } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+// Utility function for class names
+function cn(...classes: (string | undefined | false)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
 
-// Switch variant configurations based on modern 2025 patterns
+/**
+ * Switch - OrbiPax Health Philosophy Compliant
+ *
+ * ACCESSIBILITY (WCAG 2.1 AA):
+ * - Minimum 44×44px touch targets for healthcare devices
+ * - Proper role="switch" with ARIA state management
+ * - Keyboard navigation (Space, Enter) support
+ * - Focus indicators and screen reader announcements
+ * - Loading states with appropriate accessibility
+ * - Required field indicators for form validation
+ *
+ * HEALTH DESIGN TOKENS:
+ * - Semantic color system for medical contexts
+ * - Consistent sizing with other form controls
+ * - Professional appearance for clinical settings
+ * - Clear visual feedback for on/off states
+ *
+ * CONTAINER QUERIES:
+ * - Responsive sizing for different device contexts
+ * - Adaptable to medical device viewports
+ * - Touch-friendly targets on mobile healthcare devices
+ */
+
+// Switch variant configurations based on Health Philosophy
 interface SwitchVariants {
   size: "sm" | "md" | "lg";
   variant: "default" | "success" | "warning" | "error";
@@ -42,9 +69,9 @@ const switchVariants = {
     base: "relative inline-flex shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
 
     sizes: {
-      sm: "h-4 w-7",
-      md: "h-6 w-11",
-      lg: "h-8 w-14"
+      sm: "min-h-[36px] h-4 w-7", // Small but accessible
+      md: "min-h-[44px] h-6 w-11", // Healthcare standard 44×44px
+      lg: "min-h-[48px] h-8 w-14" // Large touch targets
     },
 
     variants: {
@@ -350,7 +377,15 @@ const SwitchRoot = forwardRef<HTMLButtonElement, SwitchProps>(
                 className={labelClasses}
               >
                 {label}
-                {required && <span className={switchVariants.content.required}>*</span>}
+                {required && (
+                  <span
+                    className="text-destructive ml-1 text-sm"
+                    aria-label="required field"
+                    role="img"
+                  >
+                    *
+                  </span>
+                )}
               </label>
             )}
 

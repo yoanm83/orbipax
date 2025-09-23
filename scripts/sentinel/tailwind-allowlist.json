@@ -1,0 +1,171 @@
+{
+  "description": "OrbiPax Health - Tailwind v4 Semantic Token Allowlist",
+  "version": "1.1",
+  "colors": [
+    "primary",
+    "secondary",
+    "tertiary",
+    "success",
+    "warning",
+    "critical",
+    "info",
+    "surface",
+    "background",
+    "foreground",
+    "muted",
+    "accent",
+    "destructive",
+    "clinical-primary",
+    "clinical-secondary",
+    "clinical-accent",
+    "patient-data",
+    "provider-action",
+    "provider-primary",
+    "emergency",
+    "routine",
+    "urgent",
+    "appointment-scheduled",
+    "appointment-confirmed",
+    "appointment-cancelled",
+    "note-draft",
+    "note-final",
+    "assessment-pending",
+    "assessment-complete",
+    "status-active",
+    "status-inactive",
+    "status-pending",
+    "accessibility-high-contrast",
+    "accessibility-focus",
+    "healthcare-neutral",
+    "healthcare-positive",
+    "healthcare-caution",
+    "form-valid",
+    "form-invalid",
+    "form-focus",
+    "navigation-primary",
+    "navigation-secondary",
+    "content-primary",
+    "content-secondary",
+    "border-default",
+    "border-subtle",
+    "border-strong"
+  ],
+  "spacing": [
+    "xs",
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl",
+    "3xl",
+    "4xl",
+    "5xl",
+    "clinical-touch",
+    "form-spacing",
+    "card-padding",
+    "section-spacing",
+    "page-margin",
+    "component-gap",
+    "input-padding",
+    "button-padding",
+    "modal-padding",
+    "header-height",
+    "sidebar-width",
+    "content-width",
+    "mobile-padding",
+    "tablet-padding",
+    "desktop-padding"
+  ],
+  "allowed_numeric": [
+    0, 1, 2, 3, 4, 6, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 96
+  ],
+  "healthcare_specific": {
+    "touch_targets": {
+      "minimum": 44,
+      "recommended": 48,
+      "description": "WCAG 2.1 AA compliance for healthcare accessibility"
+    },
+    "color_contrast": {
+      "minimum_ratio": 4.5,
+      "enhanced_ratio": 7.0,
+      "description": "Healthcare applications require enhanced color contrast"
+    },
+    "clinical_color_codes": {
+      "emergency": "Critical health status requiring immediate attention",
+      "urgent": "Health status requiring prompt attention",
+      "routine": "Standard health status for regular care",
+      "patient-data": "Color coding for patient information display",
+      "provider-action": "Color coding for provider-initiated actions"
+    }
+  },
+  "forbidden_patterns": [
+    {
+      "pattern": "(?:red|blue|green|yellow|purple|pink|indigo|gray|slate|zinc|neutral|stone|orange|amber|lime|emerald|teal|cyan|sky|violet|fuchsia|rose)-\\d+",
+      "description": "Hardcoded Tailwind color-number combinations",
+      "example": "bg-red-500, text-blue-600",
+      "replacement": "Use semantic tokens like bg-critical, text-clinical-primary"
+    },
+    {
+      "pattern": "#[0-9A-Fa-f]{3,6}",
+      "description": "Hex color codes",
+      "example": "#ff0000, #3b82f6",
+      "replacement": "Use OKLCH-based semantic tokens"
+    },
+    {
+      "pattern": "(?:rgb|hsl|rgba|hsla)\\([^)]+\\)",
+      "description": "RGB/HSL color functions",
+      "example": "rgb(255, 0, 0), hsl(220, 50%, 50%)",
+      "replacement": "Use OKLCH-based semantic tokens for better accessibility"
+    }
+  ],
+  "exemptions": {
+    "files": [
+      "tailwind.config.js",
+      "globals.css",
+      "theme.css",
+      "design-tokens.css"
+    ],
+    "contexts": [
+      "/* @allow-hardcode */",
+      "// @design-system-definition",
+      "@exempt:design-tokens"
+    ],
+    "description": "Files and contexts where hardcoded values are allowed for design system definition"
+  },
+  "migration_guide": {
+    "common_replacements": {
+      "bg-red-500": "bg-critical",
+      "bg-green-500": "bg-success",
+      "bg-yellow-500": "bg-warning",
+      "bg-blue-500": "bg-primary",
+      "text-gray-900": "text-foreground",
+      "text-gray-500": "text-muted",
+      "border-gray-300": "border-default",
+      "p-4": "p-md",
+      "m-8": "m-lg",
+      "w-64": "w-sidebar-width"
+    },
+    "healthcare_mappings": {
+      "patient_status_colors": {
+        "active": "status-active",
+        "inactive": "status-inactive",
+        "pending": "status-pending"
+      },
+      "appointment_colors": {
+        "scheduled": "appointment-scheduled",
+        "confirmed": "appointment-confirmed",
+        "cancelled": "appointment-cancelled"
+      },
+      "clinical_note_colors": {
+        "draft": "note-draft",
+        "final": "note-final"
+      }
+    }
+  },
+  "enforcement_rules": {
+    "strict_mode": true,
+    "max_numeric_violations": 3,
+    "require_semantic_for_clinical": true,
+    "description": "Healthcare applications require strict semantic token usage for consistency and accessibility"
+  }
+}

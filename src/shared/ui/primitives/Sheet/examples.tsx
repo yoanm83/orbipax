@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
+import { Avatar } from "../Avatar";
 import { Button } from "../Button";
 import { Input } from "../Input";
 import { Textarea } from "../Textarea";
-import { Avatar } from "../Avatar";
 import { useToast } from "../Toast";
 
 import { Sheet } from "./index";

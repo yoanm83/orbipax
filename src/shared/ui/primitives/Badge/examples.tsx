@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { Button } from "../Button";
 import { Avatar } from "../Avatar";
+import { Button } from "../Button";
 import { Card } from "../Card";
 import { Input } from "../Input";
 import { useToast } from "../Toast";

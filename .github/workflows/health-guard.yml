@@ -1,0 +1,146 @@
+name: 🏥 Health Guard v1.1 - OrbiPax CMH Philosophy Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+
+jobs:
+  health-guard:
+    name: 🔍 Validate Health Philosophy Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📋 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 🔧 Install Dependencies
+        run: npm ci
+
+      - name: 🏥 Run Health Guard v1.1
+        run: |
+          echo "🏥 OrbiPax Health Guard v1.1 - Validating CMH Philosophy Compliance"
+          echo "================================================"
+
+          # Run the health guard in full mode for CI
+          node scripts/sentinel/health-guard.cjs --full
+
+          # Store exit code
+          GUARD_EXIT_CODE=$?
+
+          echo ""
+          echo "================================================"
+
+          if [ $GUARD_EXIT_CODE -ne 0 ]; then
+            echo "❌ Health Guard FAILED - Philosophy violations detected"
+            echo ""
+            echo "📄 Violation Report:"
+            cat tmp/health_guard_violations.md || echo "Report not generated"
+            echo ""
+            echo "🚫 This PR cannot be merged until violations are fixed."
+            echo ""
+            echo "Required Actions:"
+            echo "1. Review the violation report above"
+            echo "2. Fix all listed violations"
+            echo "3. Ensure AUDIT SUMMARY is complete and follows template"
+            echo "4. Follow OrbiPax Health philosophy guidelines"
+            echo "5. Re-run the health guard locally: npm run health:guard"
+            echo ""
+            exit 1
+          else
+            echo "✅ Health Guard PASSED - All philosophy compliance checks successful"
+            echo ""
+            echo "🎉 This PR follows OrbiPax Health philosophy guidelines:"
+            echo "  ✅ AUDIT-FIRST workflow followed"
+            echo "  ✅ SoC boundaries respected (UI→App→Domain→Infra)"
+            echo "  ✅ RLS/multi-tenant compliance verified"
+            echo "  ✅ UI tokens v4 semantic usage"
+            echo "  ✅ WCAG 2.1 AA accessibility standards"
+            echo "  ✅ Zod validation schemas properly used"
+            echo "  ✅ BFF wrappers correctly implemented"
+            echo "  ✅ No duplicate functionality detected"
+            echo "  ✅ Path validation successful"
+            echo ""
+          fi
+
+      - name: 📄 Upload Health Guard Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-guard-report
+          path: tmp/health_guard_violations.md
+          retention-days: 7
+
+      - name: 💬 Comment PR with Results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'tmp/health_guard_violations.md';
+
+            let reportContent = '';
+            try {
+              reportContent = fs.readFileSync(path, 'utf8');
+            } catch (error) {
+              reportContent = '✅ Health Guard passed - no violations found!';
+            }
+
+            const comment = `## 🏥 OrbiPax Health Guard Report
+
+            ${reportContent.includes('Total Violations: 0') || !reportContent.includes('Violations Found')
+              ? '✅ **PASSED** - All Health philosophy compliance checks successful!'
+              : '❌ **FAILED** - Health philosophy violations detected'}
+
+            <details>
+            <summary>📄 Detailed Report</summary>
+
+            \`\`\`
+            ${reportContent}
+            \`\`\`
+
+            </details>
+
+            ---
+
+            **Health Philosophy Compliance**: This PR ${reportContent.includes('Total Violations: 0') || !reportContent.includes('Violations Found') ? 'follows' : 'violates'} OrbiPax CMH development guidelines.
+
+            ${reportContent.includes('Total Violations: 0') || !reportContent.includes('Violations Found')
+              ? '🎉 Ready for review and merge!'
+              : '🚫 Please fix violations before merge.'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Optional: Block merge if health guard fails
+  health-guard-required:
+    name: 🚫 Health Guard Required Check
+    runs-on: ubuntu-latest
+    needs: health-guard
+    if: always()
+
+    steps:
+      - name: ✅ Health Guard Status Check
+        run: |
+          if [ "${{ needs.health-guard.result }}" != "success" ]; then
+            echo "❌ Health Guard failed - blocking merge"
+            echo "Fix philosophy violations before merging"
+            exit 1
+          else
+            echo "✅ Health Guard passed - merge allowed"
+          fi

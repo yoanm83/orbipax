@@ -1,4 +1,28 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+echo "🏥 Running OrbiPax Health Guard v1.1 (FAST mode - pre-commit)..."
+
+# Run the health guard in fast mode for pre-commit
+node scripts/sentinel/health-guard.cjs --fast
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "💥 Health Guard failed! Commit blocked."
+  echo "📄 Check tmp/health_guard_violations.md for details"
+  echo ""
+  echo "To fix:"
+  echo "1. Address the violations listed in the report"
+  echo "2. Ensure AUDIT SUMMARY is complete"
+  echo "3. Follow Health philosophy guidelines"
+  echo ""
+  echo "To bypass (emergency only, requires approval):"
+  echo "git commit --no-verify"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Health Guard passed! Running lint-staged..."
+
+# Run lint-staged after health guard passes
 npx --no -- lint-staged

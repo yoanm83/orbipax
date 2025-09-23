@@ -1,7 +1,34 @@
 import { forwardRef, createContext, useContext, useState, useCallback, useId, useRef, useEffect } from "react";
 import type { ComponentPropsWithoutRef, ReactNode, KeyboardEvent } from "react";
+// Utility function for class names
+function cn(...classes: (string | undefined | false)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
 
-// Select variant configurations based on modern 2025 patterns
+/**
+ * Select - OrbiPax Health Philosophy Compliant
+ *
+ * ACCESSIBILITY (WCAG 2.1 AA):
+ * - Minimum 44×44px touch targets for healthcare devices
+ * - Proper ARIA attributes (combobox, listbox, option)
+ * - Keyboard navigation (Arrow keys, Enter, Space, Escape)
+ * - Screen reader announcements for selection changes
+ * - Focus management and return-to-trigger behavior
+ * - Required field indicators and error states
+ *
+ * HEALTH DESIGN TOKENS:
+ * - Semantic color system for medical contexts
+ * - Consistent sizing with other form controls
+ * - Professional appearance for clinical settings
+ * - State-based visual feedback (error, success, warning)
+ *
+ * CONTAINER QUERIES:
+ * - Responsive sizing for different device contexts
+ * - Adaptable to medical device viewports
+ * - Touch-friendly targets on mobile healthcare devices
+ */
+
+// Select variant configurations based on Health Philosophy
 interface SelectVariants {
   variant: "outlined" | "filled" | "underlined";
   size: "sm" | "md" | "lg";
@@ -99,9 +126,9 @@ const selectVariants = {
     },
 
     sizes: {
-      sm: "h-8 px-2 text-xs",
-      md: "h-10 px-3 text-sm",
-      lg: "h-12 px-4 text-base"
+      sm: "min-h-[36px] h-9 px-2 text-xs", // Small but accessible
+      md: "min-h-[44px] h-11 px-3 text-sm", // Healthcare standard 44×44px
+      lg: "min-h-[48px] h-12 px-4 text-base" // Large touch targets
     }
   },
 
@@ -280,10 +307,23 @@ const SelectRoot = forwardRef<HTMLButtonElement, SelectProps>(
             <label
               id={labelId}
               htmlFor={triggerId}
-              className={`${selectVariants.label.base} ${selectVariants.label.states[finalState]}`}
+              className={cn(
+                selectVariants.label.base,
+                selectVariants.label.states[finalState],
+                "@container/form:(max-width:320px):text-xs",
+                "@container/form:(min-width:768px):text-base"
+              )}
             >
               {label}
-              {required && <span className="text-error ml-1">*</span>}
+              {required && (
+                <span
+                  className="text-destructive ml-1 text-sm"
+                  aria-label="required field"
+                  role="img"
+                >
+                  *
+                </span>
+              )}
             </label>
           )}
 

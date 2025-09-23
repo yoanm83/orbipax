@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { EmailField } from './EmailField';
 import { PasswordField } from './PasswordField';
 import { RememberMe } from './RememberMe';
@@ -10,6 +11,7 @@ import { SignupPrompt } from './SignupPrompt';
 import { Disclaimer } from './Disclaimer';
 
 export function LoginForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,10 +26,11 @@ export function LoginForm() {
     setError("");
     setIsLoading(true);
 
-    // TODO: Phase 3 - Connect to actual auth logic
+    // Simulate login process and navigate to dashboard
     setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+      router.push('/dashboard');
+    }, 1000);
   };
 
 

@@ -111,7 +111,10 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Container queries plugin for healthcare devices
+    require('@tailwindcss/container-queries'),
+  ],
 } satisfies Config
 
 export default config

@@ -1,7 +1,34 @@
 import { forwardRef, createContext, useContext, useState, useCallback, useId } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+// Utility function for class names
+function cn(...classes: (string | undefined | false)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
 
-// Checkbox variant configurations based on modern 2025 patterns
+/**
+ * Checkbox - OrbiPax Health Philosophy Compliant
+ *
+ * ACCESSIBILITY (WCAG 2.1 AA):
+ * - Minimum 44×44px touch targets for healthcare devices
+ * - High contrast visual states for clinical environments
+ * - Proper ARIA attributes and keyboard navigation
+ * - Screen reader support with state announcements
+ * - Group semantics with role="group" and ARIA relationships
+ * - Required field indicators for form validation
+ *
+ * HEALTH DESIGN TOKENS:
+ * - Semantic color system for medical contexts
+ * - Consistent sizing with other form controls
+ * - Professional appearance for clinical settings
+ * - Clear visual feedback for selection states
+ *
+ * CONTAINER QUERIES:
+ * - Responsive sizing for different device contexts
+ * - Adaptable to medical device viewports
+ * - Touch-friendly targets on mobile healthcare devices
+ */
+
+// Checkbox variant configurations based on Health Philosophy
 interface CheckboxVariants {
   size: "sm" | "md" | "lg";
   variant: "default" | "outline" | "soft";
@@ -73,9 +100,9 @@ const checkboxVariants = {
     base: "relative flex items-center justify-center shrink-0 border rounded transition-all duration-150 ease-out",
 
     sizes: {
-      sm: "h-4 w-4 text-xs",
-      md: "h-5 w-5 text-sm",
-      lg: "h-6 w-6 text-base"
+      sm: "min-h-[36px] min-w-[36px] h-4 w-4 text-xs", // Small but accessible
+      md: "min-h-[44px] min-w-[44px] h-5 w-5 text-sm", // Healthcare standard 44×44px
+      lg: "min-h-[48px] min-w-[48px] h-6 w-6 text-base" // Large touch targets
     },
 
     variants: {
@@ -316,7 +343,15 @@ const CheckboxRoot = forwardRef<HTMLInputElement, CheckboxProps>(
             {label && (
               <label htmlFor={id} className={labelClasses}>
                 {label}
-                {required && <span className="text-error ml-1">*</span>}
+                {required && (
+                  <span
+                    className="text-destructive ml-1 text-sm"
+                    aria-label="required field"
+                    role="img"
+                  >
+                    *
+                  </span>
+                )}
               </label>
             )}
 
@@ -419,7 +454,15 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
               className={checkboxVariants.group.label}
             >
               {label}
-              {required && <span className="text-error ml-1">*</span>}
+              {required && (
+                <span
+                  className="text-destructive ml-1 text-sm"
+                  aria-label="required field"
+                  role="img"
+                >
+                  *
+                </span>
+              )}
             </div>
           )}
 

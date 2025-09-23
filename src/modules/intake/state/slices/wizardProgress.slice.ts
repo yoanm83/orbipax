@@ -1,0 +1,156 @@
+"use client";
+
+import { create } from "zustand";
+import type { WizardStep, TransitionState, WizardFlags, StepCompletion, WizardPreferences } from "../types";
+
+/**
+ * Wizard Progress Slice - UI-Only Navigation State
+ *
+ * IMPORTANT: NO PHI (Protected Health Information) allowed.
+ * Only manages navigation state and UI flags for the intake wizard.
+ */
+
+interface WizardProgressState extends WizardFlags, StepCompletion, WizardPreferences {
+  /** Current active step */
+  currentStep: WizardStep;
+  /** Transition state for UI feedback */
+  transitionState: TransitionState;
+}
+
+interface WizardProgressActions {
+  /** Navigate to specific step */
+  goToStep: (step: WizardStep) => void;
+  /** Navigate to next step */
+  nextStep: () => void;
+  /** Navigate to previous step */
+  prevStep: () => void;
+  /** Mark step as visited */
+  markStepVisited: (step: WizardStep) => void;
+  /** Mark step as completed */
+  markStepCompleted: (step: WizardStep) => void;
+  /** Set wizard flags */
+  setWizardFlags: (flags: Partial<WizardFlags>) => void;
+  /** Set UI preferences */
+  setPreferences: (prefs: Partial<WizardPreferences>) => void;
+  /** Reset wizard to initial state */
+  resetWizard: () => void;
+}
+
+type WizardProgressStore = WizardProgressState & WizardProgressActions;
+
+/** Step order for navigation logic */
+const STEP_ORDER: WizardStep[] = [
+  'welcome',
+  'demographics',
+  'insurance',
+  'diagnoses',
+  'medical-providers',
+  'medications',
+  'referrals',
+  'legal-forms',
+  'goals',
+  'review'
+];
+
+/** Initial state - UI-only defaults */
+const initialState: WizardProgressState = {
+  // Navigation
+  currentStep: 'demographics',
+  transitionState: 'idle',
+
+  // Flags
+  isCurrentStepValid: false,
+  allowSkipAhead: false,
+  showProgress: true,
+  isTransitioning: false,
+
+  // Completion tracking
+  visitedSteps: ['demographics'],
+  completedSteps: [],
+
+  // Preferences
+  showStepDescriptions: true,
+  compactMode: false,
+};
+
+export const useWizardProgressStore = create<WizardProgressStore>((set, get) => ({
+  ...initialState,
+
+  goToStep: (step: WizardStep) => {
+    const { allowSkipAhead, visitedSteps } = get();
+    const currentIndex = STEP_ORDER.indexOf(get().currentStep);
+    const targetIndex = STEP_ORDER.indexOf(step);
+
+    // Allow navigation if:
+    // 1. Going backwards
+    // 2. Skip ahead is enabled
+    // 3. Step was already visited
+    const canNavigate =
+      targetIndex <= currentIndex ||
+      allowSkipAhead ||
+      visitedSteps.includes(step);
+
+    if (!canNavigate) return;
+
+    set((state) => ({
+      currentStep: step,
+      transitionState: 'navigating',
+      visitedSteps: state.visitedSteps.includes(step)
+        ? state.visitedSteps
+        : [...state.visitedSteps, step],
+      isTransitioning: true,
+    }));
+
+    // Reset transition state after animation
+    setTimeout(() => {
+      set({ transitionState: 'idle', isTransitioning: false });
+    }, 200);
+  },
+
+  nextStep: () => {
+    const currentIndex = STEP_ORDER.indexOf(get().currentStep);
+    if (currentIndex < STEP_ORDER.length - 1) {
+      const nextStep = STEP_ORDER[currentIndex + 1];
+      get().goToStep(nextStep);
+    }
+  },
+
+  prevStep: () => {
+    const currentIndex = STEP_ORDER.indexOf(get().currentStep);
+    if (currentIndex > 0) {
+      const prevStep = STEP_ORDER[currentIndex - 1];
+      get().goToStep(prevStep);
+    }
+  },
+
+  markStepVisited: (step: WizardStep) => {
+    set((state) => ({
+      visitedSteps: state.visitedSteps.includes(step)
+        ? state.visitedSteps
+        : [...state.visitedSteps, step],
+    }));
+  },
+
+  markStepCompleted: (step: WizardStep) => {
+    set((state) => ({
+      completedSteps: state.completedSteps.includes(step)
+        ? state.completedSteps
+        : [...state.completedSteps, step],
+      visitedSteps: state.visitedSteps.includes(step)
+        ? state.visitedSteps
+        : [...state.visitedSteps, step],
+    }));
+  },
+
+  setWizardFlags: (flags: Partial<WizardFlags>) => {
+    set((state) => ({ ...state, ...flags }));
+  },
+
+  setPreferences: (prefs: Partial<WizardPreferences>) => {
+    set((state) => ({ ...state, ...prefs }));
+  },
+
+  resetWizard: () => {
+    set({ ...initialState });
+  },
+}));

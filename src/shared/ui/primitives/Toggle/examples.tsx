@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { Button } from "../Button";
 import { useToast } from "../Toast";
 
 import { Toggle } from "./index";

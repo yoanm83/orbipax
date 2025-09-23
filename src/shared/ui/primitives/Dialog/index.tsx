@@ -1,6 +1,6 @@
 import { forwardRef, createContext, useContext, useState, useCallback, useId, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import type { ComponentPropsWithoutRef, ReactNode, KeyboardEvent, MouseEvent } from "react";
+import { createPortal } from "react-dom";
 
 // Dialog variant configurations based on modern 2025 patterns
 interface DialogVariants {
@@ -96,7 +96,7 @@ const getFocusableElements = (container: HTMLElement): HTMLElement[] => {
     '[contenteditable="true"]'
   ];
 
-  return Array.from(container.querySelectorAll(selectors.join(', '))) as HTMLElement[];
+  return Array.from(container.querySelectorAll(selectors.join(', ')));
 };
 
 const useFocusTrap = (enabled: boolean, containerRef: React.RefObject<HTMLElement>) => {

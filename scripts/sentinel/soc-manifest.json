@@ -1,0 +1,264 @@
+{
+  "description": "OrbiPax Health - Separation of Concerns (SoC) Architecture Manifest",
+  "version": "1.1",
+  "architecture_pattern": "Clean Architecture",
+  "flow": "UI → Application → Domain → Infrastructure",
+  "layers": {
+    "ui": {
+      "description": "UI components and presentation logic",
+      "responsibilities": [
+        "React components and JSX rendering",
+        "User interaction handling",
+        "Form presentation and validation display",
+        "Styling and visual presentation",
+        "Client-side routing and navigation"
+      ],
+      "allowed_imports": [
+        "@/modules/*/application/*",
+        "@/shared/ui/*",
+        "@/lib/ui/*",
+        "@/lib/utils/*",
+        "@/lib/validation/client/*",
+        "@/components/shared/*",
+        "@/hooks/*",
+        "@/types/ui/*"
+      ],
+      "forbidden_imports": [
+        "@/modules/*/domain/*",
+        "@/modules/*/infrastructure/*",
+        "@/lib/database/*",
+        "@/lib/auth/server/*",
+        "@/lib/validation/server/*"
+      ],
+      "allowed_dependencies": [
+        "react",
+        "react-dom",
+        "react-hook-form",
+        "@hookform/resolvers",
+        "lucide-react",
+        "clsx",
+        "tailwindcss"
+      ],
+      "patterns": {
+        "component_structure": "Functional components with hooks",
+        "state_management": "React state, no direct domain access",
+        "data_fetching": "Through application layer services only"
+      },
+      "healthcare_specific": {
+        "phi_handling": "Never process raw PHI data",
+        "accessibility": "WCAG 2.1 AA compliance required",
+        "touch_targets": "Minimum 44px for healthcare professionals"
+      }
+    },
+    "application": {
+      "description": "Application services and orchestration logic",
+      "responsibilities": [
+        "Use case orchestration",
+        "Data transformation between layers",
+        "Client-server communication",
+        "Application-specific business logic",
+        "Coordination of domain services"
+      ],
+      "allowed_imports": [
+        "@/modules/*/domain/*",
+        "@/shared/application/*",
+        "@/lib/validation/*",
+        "@/lib/auth/*",
+        "@/lib/utils/*",
+        "@/types/application/*",
+        "@/types/domain/*"
+      ],
+      "forbidden_imports": [
+        "@/modules/*/infrastructure/*",
+        "@/modules/*/ui/*",
+        "@/components/*",
+        "@/lib/database/queries/*",
+        "@/lib/external-apis/direct/*"
+      ],
+      "allowed_dependencies": [
+        "zod",
+        "@supabase/ssr",
+        "next"
+      ],
+      "patterns": {
+        "service_structure": "Service classes with dependency injection",
+        "error_handling": "Domain errors with application context",
+        "validation": "Input validation before domain calls"
+      },
+      "healthcare_specific": {
+        "audit_trail": "All operations must be auditable",
+        "multi_tenancy": "Organization-aware service calls",
+        "data_flow": "Sanitize data between UI and Domain"
+      }
+    },
+    "domain": {
+      "description": "Pure business logic and domain entities",
+      "responsibilities": [
+        "Core business rules and logic",
+        "Domain entities and value objects",
+        "Domain services and aggregates",
+        "Business validation rules",
+        "Healthcare-specific business logic"
+      ],
+      "allowed_imports": [
+        "@/shared/domain/*",
+        "@/lib/types/domain/*",
+        "@/lib/validation/domain/*"
+      ],
+      "forbidden_imports": [
+        "@/modules/*/infrastructure/*",
+        "@/modules/*/application/*",
+        "@/modules/*/ui/*",
+        "@/lib/database/*",
+        "@/lib/auth/*",
+        "@/lib/external-apis/*",
+        "@/components/*"
+      ],
+      "allowed_dependencies": [
+        "zod"
+      ],
+      "patterns": {
+        "entity_structure": "Domain entities with behavior",
+        "value_objects": "Immutable value objects",
+        "domain_services": "Stateless business logic services",
+        "aggregates": "Consistency boundary enforcement"
+      },
+      "healthcare_specific": {
+        "clinical_rules": "Healthcare business rules implementation",
+        "compliance": "HIPAA and clinical workflow validation",
+        "data_integrity": "Clinical data consistency rules"
+      }
+    },
+    "infrastructure": {
+      "description": "External concerns and data persistence",
+      "responsibilities": [
+        "Database access and queries",
+        "External API integrations",
+        "File system operations",
+        "Third-party service integrations",
+        "Infrastructure-specific implementations"
+      ],
+      "allowed_imports": [
+        "@/modules/*/domain/*",
+        "@/shared/infrastructure/*",
+        "@/lib/database/*",
+        "@/lib/external-apis/*",
+        "@/lib/auth/server/*",
+        "@/types/infrastructure/*",
+        "@/types/domain/*"
+      ],
+      "forbidden_imports": [
+        "@/modules/*/ui/*",
+        "@/modules/*/application/*",
+        "@/components/*",
+        "@/hooks/*"
+      ],
+      "allowed_dependencies": [
+        "@supabase/supabase-js",
+        "zod"
+      ],
+      "patterns": {
+        "repository_pattern": "Data access abstraction",
+        "adapter_pattern": "External service integration",
+        "factory_pattern": "Domain object creation"
+      },
+      "healthcare_specific": {
+        "rls_enforcement": "Row Level Security implementation",
+        "audit_logging": "Comprehensive audit trail",
+        "data_encryption": "PHI encryption at rest and transit"
+      }
+    }
+  },
+  "shared_modules": {
+    "ui": {
+      "description": "Reusable UI components and utilities",
+      "allowed_imports": ["@/lib/ui/*", "@/types/ui/*"],
+      "examples": ["Button", "Input", "Modal", "Toast"]
+    },
+    "application": {
+      "description": "Cross-cutting application concerns",
+      "allowed_imports": ["@/lib/validation/*", "@/types/application/*"],
+      "examples": ["ErrorHandler", "Logger", "Cache"]
+    },
+    "domain": {
+      "description": "Shared domain concepts",
+      "allowed_imports": ["@/lib/types/domain/*"],
+      "examples": ["ValueObjects", "DomainEvents", "Specifications"]
+    },
+    "infrastructure": {
+      "description": "Infrastructure utilities",
+      "allowed_imports": ["@/lib/database/*", "@/types/infrastructure/*"],
+      "examples": ["Database", "ExternalApis", "FileSystem"]
+    }
+  },
+  "violation_detection": {
+    "import_patterns": {
+      "cross_layer_violations": {
+        "ui_to_domain": "@/modules/.*/ui/.*from.*@/modules/.*/domain/",
+        "ui_to_infrastructure": "@/modules/.*/ui/.*from.*@/modules/.*/infrastructure/",
+        "domain_to_infrastructure": "@/modules/.*/domain/.*from.*@/modules/.*/infrastructure/",
+        "domain_to_application": "@/modules/.*/domain/.*from.*@/modules/.*/application/",
+        "domain_to_ui": "@/modules/.*/domain/.*from.*@/modules/.*/ui/"
+      },
+      "dependency_violations": {
+        "ui_database_access": "@/modules/.*/ui/.*from.*@/lib/database/",
+        "domain_external_apis": "@/modules/.*/domain/.*from.*@/lib/external-apis/"
+      }
+    },
+    "exemptions": {
+      "files": [
+        "*.test.ts",
+        "*.test.tsx",
+        "*.spec.ts",
+        "*.story.tsx",
+        "*.mock.ts"
+      ],
+      "comments": [
+        "/* @soc-exempt: testing */",
+        "// @allow-cross-layer: integration-test",
+        "@exempt:soc-violation"
+      ]
+    }
+  },
+  "enforcement_rules": {
+    "strict_mode": true,
+    "allow_shared_modules": true,
+    "require_explicit_exemptions": true,
+    "healthcare_specific_enforcement": {
+      "clinical_data_flow": "Clinical data must flow through proper layers",
+      "phi_isolation": "PHI processing must be isolated in appropriate layers",
+      "audit_compliance": "All layers must support audit requirements"
+    }
+  },
+  "migration_assistance": {
+    "common_violations": {
+      "ui_direct_domain": {
+        "description": "UI components directly importing domain logic",
+        "fix": "Create application service to mediate between UI and domain",
+        "example": "Move patient validation from UI to application layer"
+      },
+      "domain_infrastructure_leak": {
+        "description": "Domain layer importing infrastructure concerns",
+        "fix": "Use dependency inversion with interfaces",
+        "example": "Define repository interface in domain, implement in infrastructure"
+      }
+    },
+    "refactoring_patterns": {
+      "extract_application_service": "Move orchestration logic from UI to application layer",
+      "introduce_domain_service": "Extract business logic from application to domain",
+      "abstract_infrastructure": "Create abstractions for external dependencies"
+    }
+  },
+  "healthcare_compliance": {
+    "hipaa_considerations": {
+      "phi_flow": "PHI must follow designated layer boundaries",
+      "audit_trail": "All layers must participate in audit logging",
+      "access_control": "Layer-specific access control implementation"
+    },
+    "clinical_workflow": {
+      "patient_safety": "Safety-critical logic must be in domain layer",
+      "regulatory_compliance": "Compliance rules implemented in domain",
+      "care_coordination": "Cross-provider workflows in application layer"
+    }
+  }
+}

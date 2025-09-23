@@ -1,4 +1,22 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+echo "🏥 Running OrbiPax Health Guard v1.1 (FULL mode - pre-push)..."
+
+# Run health guard in full mode for pre-push
+node scripts/sentinel/health-guard.cjs --full
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "💥 Health Guard failed! Push blocked."
+  echo "📄 Check tmp/health_guard_violations.md for details"
+  echo ""
+  echo "Fix violations before pushing to remote repository."
+  echo ""
+  exit 1
+fi
+
+echo "✅ Health Guard passed! Running quality checks..."
+
+# Run quality checks after health guard passes
 npm run quality
