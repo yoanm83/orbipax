@@ -33,7 +33,6 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
   const handleContactInfoChange = (data: any) => {
     // TODO: Replace with server-driven form handling
     setContactInfo(prev => ({ ...prev, ...data }))
-    console.log('Contact change:', data)
   }
 
   // Format phone number as user types
@@ -52,20 +51,31 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
   }
 
   return (
-    <Card className="w-full rounded-2xl shadow-md mb-6 @container">
+    <Card className="w-full rounded-3xl shadow-md mb-6 @container">
       <div
-        className="p-6 flex justify-between items-center cursor-pointer"
+        id="header-contact"
+        className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onSectionToggle()
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-controls="panel-contact"
       >
         <div className="flex items-center gap-2">
           <Phone className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Contact Information</h2>
+          <h2 className="text-lg font-medium text-[var(--foreground)]">Contact Information</h2>
         </div>
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
       </div>
 
       {isExpanded && (
-        <CardBody className="p-6">
+        <CardBody id="panel-contact" aria-labelledby="header-contact" className="p-6">
           <div className="grid grid-cols-1 @lg:grid-cols-2 gap-6">
             {/* Primary Phone */}
             <div className="space-y-2">
@@ -160,21 +170,30 @@ export function ContactSection({ onSectionToggle, isExpanded }: ContactSectionPr
 
                 <div className="space-y-2">
                   <Label htmlFor="emergencyRelationship">Relationship *</Label>
-                  <Input
-                    id="emergencyRelationship"
-                    name="emergencyRelationship"
-                    type="text"
-                    autoComplete="off"
-                    placeholder="Enter relationship"
-                    required
+                  <Select
                     value={contactInfo.emergencyContact.relationship}
-                    onChange={(e) => handleContactInfoChange({
+                    onValueChange={(value) => handleContactInfoChange({
                       emergencyContact: {
                         ...contactInfo.emergencyContact,
-                        relationship: e.target.value
+                        relationship: value
                       }
                     })}
-                  />
+                  >
+                    <SelectTrigger id="emergencyRelationship" className="min-h-11">
+                      <SelectValue placeholder="Select relationship" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="spouse">Spouse/Partner</SelectItem>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="child">Child</SelectItem>
+                      <SelectItem value="sibling">Sibling</SelectItem>
+                      <SelectItem value="friend">Friend</SelectItem>
+                      <SelectItem value="caregiver">Caregiver</SelectItem>
+                      <SelectItem value="legal_guardian">Legal Guardian</SelectItem>
+                      <SelectItem value="grandparent">Grandparent</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">

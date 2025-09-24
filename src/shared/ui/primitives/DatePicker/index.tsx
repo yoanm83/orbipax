@@ -5,7 +5,6 @@ import { format, getMonth, getYear, setMonth as setDateMonth, setYear as setDate
 import { enUS } from "date-fns/locale"
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/shared/ui/primitives/Button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/primitives/Popover"
 import { DatePickerTriggerInput } from "./DatePickerTriggerInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
@@ -151,21 +150,20 @@ const CustomCalendar = React.memo(function CustomCalendar({
   return (
     <div
       ref={calendarRef}
-      className="p-3 space-y-3 bg-white text-popover-foreground"
+      className="p-4 space-y-3"
       role="application"
       aria-label={`Calendar for ${format(currentMonth, 'MMMM yyyy')}`}
     >
       {/* Header with month/year selection */}
       <div className="flex items-center justify-between gap-2 px-1">
-        <Button
-          variant="outline"
-          size="icon"
+        <button
           onClick={() => navigateMonth("prev")}
-          className="h-8 w-8 hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="h-8 w-8 inline-flex items-center justify-center rounded border border-[color:var(--border)] bg-[var(--popover)] hover:bg-[var(--muted)] hover:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)] transition-colors"
           aria-label="Previous month"
+          type="button"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        </Button>
+        </button>
 
         <div className="flex gap-2">
           <Select
@@ -213,15 +211,14 @@ const CustomCalendar = React.memo(function CustomCalendar({
           </Select>
         </div>
 
-        <Button
-          variant="outline"
-          size="icon"
+        <button
           onClick={() => navigateMonth("next")}
-          className="h-8 w-8 hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="h-8 w-8 inline-flex items-center justify-center rounded border border-[color:var(--border)] bg-[var(--popover)] hover:bg-[var(--muted)] hover:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)] transition-colors"
           aria-label="Next month"
+          type="button"
         >
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
-        </Button>
+        </button>
       </div>
 
       {/* Weekday headers */}
@@ -257,9 +254,9 @@ const CustomCalendar = React.memo(function CustomCalendar({
               className={cn(
                 "h-9 w-9 p-0 font-normal rounded-md transition-colors",
                 "inline-flex items-center justify-center text-sm",
-                "hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                day.isSelected && "bg-primary !text-white hover:bg-primary hover:!text-white",
-                day.isToday && !day.isSelected && "ring-2 ring-ring ring-offset-2",
+                "hover:bg-[var(--muted)] hover:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]",
+                day.isSelected && "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]",
+                day.isToday && !day.isSelected && "ring-2 ring-[var(--ring-primary)] ring-offset-2 ring-offset-[var(--ring-offset-background)]",
                 day.isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent text-muted-foreground"
               )}
               onClick={() => handleDateSelect(day)}
@@ -331,7 +328,7 @@ export function DatePicker({
           aria-invalid={ariaInvalid}
         />
         <PopoverContent
-          className="w-80 min-w-80 max-w-80 p-0 bg-white text-popover-foreground border border-border rounded-lg shadow-lg z-50"
+          className="w-80 min-w-80 max-w-80 p-0 bg-[var(--popover)] text-[var(--popover-foreground)] border border-[color:var(--border)] rounded-lg shadow-md z-50"
           align="start"
         >
           <CustomCalendar

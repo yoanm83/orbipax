@@ -62,26 +62,26 @@ type InputProps = BaseInputProps & (
 
 // Semantic class configurations using Health Philosophy tokens
 const inputVariants = {
-  base: "w-full transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-on-muted @container/form:(max-width:320px):text-xs @container/form:(min-width:768px):text-base",
+  base: "w-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)] disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-on-muted @container/form:(max-width:320px):text-xs @container/form:(min-width:768px):text-base",
 
   variants: {
     outlined: {
-      default: "border border-border bg-bg text-fg focus:border-ring focus:ring-2 focus:ring-ring/20",
-      error: "border border-error bg-bg text-fg focus:border-error focus:ring-2 focus:ring-error/20",
-      success: "border border-success bg-bg text-fg focus:border-success focus:ring-2 focus:ring-success/20",
-      warning: "border border-warning bg-bg text-fg focus:border-warning focus:ring-2 focus:ring-warning/20"
+      default: "border border-border bg-bg text-fg",
+      error: "border border-error bg-bg text-fg",
+      success: "border border-success bg-bg text-fg",
+      warning: "border border-warning bg-bg text-fg"
     },
     filled: {
-      default: "border-0 bg-muted text-fg focus:bg-bg focus:ring-2 focus:ring-ring",
-      error: "border-0 bg-error/10 text-fg focus:bg-bg focus:ring-2 focus:ring-error",
-      success: "border-0 bg-success/10 text-fg focus:bg-bg focus:ring-2 focus:ring-success",
-      warning: "border-0 bg-warning/10 text-fg focus:bg-bg focus:ring-2 focus:ring-warning"
+      default: "border-0 bg-muted text-fg",
+      error: "border-0 bg-error/10 text-fg",
+      success: "border-0 bg-success/10 text-fg",
+      warning: "border-0 bg-warning/10 text-fg"
     },
     underlined: {
-      default: "border-0 border-b-2 border-border bg-transparent px-0 text-fg focus:border-ring focus:ring-0",
-      error: "border-0 border-b-2 border-error bg-transparent px-0 text-fg focus:border-error focus:ring-0",
-      success: "border-0 border-b-2 border-success bg-transparent px-0 text-fg focus:border-success focus:ring-0",
-      warning: "border-0 border-b-2 border-warning bg-transparent px-0 text-fg focus:border-warning focus:ring-0"
+      default: "border-0 border-b-2 border-border bg-transparent px-0 text-fg focus-visible:ring-0 focus-visible:ring-offset-0",
+      error: "border-0 border-b-2 border-error bg-transparent px-0 text-fg focus-visible:ring-0 focus-visible:ring-offset-0",
+      success: "border-0 border-b-2 border-success bg-transparent px-0 text-fg focus-visible:ring-0 focus-visible:ring-offset-0",
+      warning: "border-0 border-b-2 border-warning bg-transparent px-0 text-fg focus-visible:ring-0 focus-visible:ring-offset-0"
     }
   },
 

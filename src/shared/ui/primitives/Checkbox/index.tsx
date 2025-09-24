@@ -17,7 +17,7 @@ const Checkbox = React.forwardRef<
       "peer h-5 w-5 shrink-0 rounded-sm border border-primary",
       // Add padding for 44px minimum touch target
       "relative before:absolute before:-inset-3 before:content-['']",
-      "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
       className
@@ -25,7 +25,7 @@ const Checkbox = React.forwardRef<
     {...props}
   >
     <CheckboxPrimitive.Indicator
-      className={cn("flex items-center justify-center text-current")}
+      className={cn("flex items-center justify-center text-white")}
     >
       <Check className="h-4 w-4" />
     </CheckboxPrimitive.Indicator>

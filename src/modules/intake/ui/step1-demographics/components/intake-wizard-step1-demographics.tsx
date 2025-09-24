@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
   useStep1ExpandedSections,
   useStep1UIStore
@@ -14,6 +15,9 @@ export function IntakeWizardStep1Demographics() {
   const expandedSections = useStep1ExpandedSections()
   const { toggleSection } = useStep1UIStore()
 
+  // Shared DOB state for Legal Section to calculate minor status
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null)
+
   return (
     <Step1SkinScope>
       <div className="flex-1 w-full p-6">
@@ -23,6 +27,7 @@ export function IntakeWizardStep1Demographics() {
           <PersonalInfoSection
             onSectionToggle={() => toggleSection('personal')}
             isExpanded={expandedSections.personal}
+            onDOBChange={setDateOfBirth}
           />
 
           <AddressSection
@@ -38,6 +43,7 @@ export function IntakeWizardStep1Demographics() {
           <LegalSection
             onSectionToggle={() => toggleSection('legal')}
             isExpanded={expandedSections.legal}
+            dateOfBirth={dateOfBirth}
           />
         </div>
       </div>

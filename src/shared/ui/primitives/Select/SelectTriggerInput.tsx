@@ -33,14 +33,14 @@ export const SelectTriggerInput = React.forwardRef<
         "border border-border bg-bg px-4 py-2 text-sm text-fg",
         "transition-all duration-200",
         "placeholder:text-on-muted",
-        // Focus states using DS tokens
-        "focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20",
+        // Focus states using consistent DS tokens
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]",
         // Disabled state
         "disabled:opacity-50 disabled:cursor-not-allowed",
         // Cursor
         "cursor-pointer",
-        // Data state animations
-        "data-[state=open]:border-ring data-[state=open]:ring-2 data-[state=open]:ring-ring/20",
+        // Data state animations - consistent with focus
+        "data-[state=open]:ring-2 data-[state=open]:ring-[var(--ring-primary)] data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-[var(--ring-offset-background)]",
         // Line clamp for text overflow
         "[&>span]:line-clamp-1",
         className

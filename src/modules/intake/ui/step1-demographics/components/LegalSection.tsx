@@ -1,13 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
 import { Input } from "@/shared/ui/primitives/Input"
 import { Label } from "@/shared/ui/primitives/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
 import { Switch } from "@/shared/ui/primitives/Switch"
 import { Shield, ChevronUp, ChevronDown } from "lucide-react"
-// TODO: Replace with server-driven form state
 import { differenceInYears } from "date-fns"
-import React from "react"
 // Utility function for class names
 function cn(...classes: (string | undefined | false)[]): string {
   return classes.filter(Boolean).join(' ')
@@ -16,29 +16,26 @@ function cn(...classes: (string | undefined | false)[]): string {
 interface LegalSectionProps {
   onSectionToggle: () => void
   isExpanded: boolean
+  dateOfBirth?: Date | null
 }
 
-export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps) {
-  // TODO: Replace with server-driven form state
-  const legalInfo = {
-    legalName: '',
-    isMinor: false,
-    guardianName: '',
-    guardianPhone: '',
-    guardianRelationship: '',
-    consentToTreat: false,
-    consentToShare: false,
-    consentToContact: false
-  }
+export function LegalSection({ onSectionToggle, isExpanded, dateOfBirth }: LegalSectionProps) {
+  // State for toggles
+  const [hasLegalGuardian, setHasLegalGuardian] = useState(false)
+  const [hasPowerOfAttorney, setHasPowerOfAttorney] = useState(false)
 
-  const personalInfo = {
-    dateOfBirth: null
-  }
+  // State for form fields
+  const [guardianInfo, setGuardianInfo] = useState({
+    name: '',
+    relationship: '',
+    phone: '',
+    email: ''
+  })
 
-  const handleLegalInfoChange = (data: any) => {
-    // TODO: Replace with server-driven form handling
-    console.log('Legal change:', data)
-  }
+  const [poaInfo, setPoaInfo] = useState({
+    name: '',
+    phone: ''
+  })
 
   // Format phone number as user types
   const formatPhoneNumber = (value: string) => {
@@ -55,44 +52,52 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`
   }
 
-  // Calculate if member is minor based on DOB
-  const isMinor = personalInfo.dateOfBirth 
-    ? differenceInYears(new Date(), personalInfo.dateOfBirth) < 18 
-    : false
+  // Calculate if patient is minor based on DOB
+  const getAge = (dob: Date | null | undefined): number => {
+    if (!dob) return 0
+    return differenceInYears(new Date(), dob)
+  }
 
-  // Update legal info when minor status changes
-  React.useEffect(() => {
-    if (legalInfo.isMinor !== isMinor) {
-      handleLegalInfoChange({ isMinor })
-    }
-  }, [isMinor, legalInfo.isMinor])
+  const age = getAge(dateOfBirth)
+  const isMinor = age < 18 && age > 0
 
   return (
-    <Card className="w-full rounded-2xl shadow-md mb-6 @container">
+    <Card className="w-full rounded-3xl shadow-md mb-6 @container">
       <div
-        className="p-6 flex justify-between items-center cursor-pointer"
+        id="header-legal"
+        className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onSectionToggle()
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-controls="panel-legal"
       >
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Legal Information</h2>
+          <h2 className="text-lg font-medium text-[var(--foreground)]">Legal Information</h2>
         </div>
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
       </div>
 
       {isExpanded && (
-        <CardBody className="p-6">
+        <CardBody id="panel-legal" aria-labelledby="header-legal" className="p-6">
           <div className="space-y-6">
             {/* Minor Status */}
-            <div className="flex items-center justify-between">
-              <Label className="text-base">
-                Member is a minor (under 18 years old)
+            <div className="flex items-center justify-between py-1">
+              <Label className="text-[var(--muted-foreground)]">
+                <span className="text-base leading-6">
+                  Patient is a minor (under 18 years old)
+                </span>
               </Label>
               <span className={cn(
-                "px-3 py-1 rounded-full text-base font-medium",
-                isMinor 
-                  ? "bg-primary/10 text-primary" 
-                  : "bg-muted text-muted-foreground"
+                "px-3 py-1 rounded-full text-sm font-medium",
+                "bg-[var(--muted)] text-[var(--muted-foreground)]"
               )}>
                 {isMinor ? 'Yes' : 'No'}
               </span>
@@ -100,16 +105,23 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
 
             {/* Guardian Information */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="hasGuardian" className="text-base">Has Legal Guardian</Label>
+              <div className="flex items-center justify-between py-1">
+                <Label htmlFor="hasGuardian" className="text-[var(--muted-foreground)]">
+                  <span className="text-base leading-6">Has Legal Guardian</span>
+                </Label>
                 <Switch
                   id="hasGuardian"
-                  checked={legalInfo.hasGuardian}
-                  onCheckedChange={(checked) => handleLegalInfoChange({ hasGuardian: checked })}
+                  checked={hasLegalGuardian}
+                  onCheckedChange={(checked) => {
+                    setHasLegalGuardian(checked)
+                    if (!checked) {
+                      setGuardianInfo({ name: '', relationship: '', phone: '', email: '' })
+                    }
+                  }}
                 />
               </div>
 
-              {legalInfo.hasGuardian && (
+              {hasLegalGuardian && (
                 <div className="grid grid-cols-1 @lg:grid-cols-2 gap-4 mt-4">
                   <div className="space-y-2">
                     <Label htmlFor="guardianName">Guardian Name *</Label>
@@ -117,48 +129,43 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
                       id="guardianName"
                       placeholder="Enter guardian's name"
                       required
-                      value={legalInfo.guardianInfo?.name || ''}
-                      onChange={(e) => handleLegalInfoChange({
-                        guardianInfo: {
-                          ...legalInfo.guardianInfo,
-                          name: e.target.value
-                        }
-                      })}
+                      value={guardianInfo.name}
+                      onChange={(e) => setGuardianInfo(prev => ({ ...prev, name: e.target.value }))}
+                      className="min-h-11"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="guardianRelationship">Relationship *</Label>
-                    <Input
-                      id="guardianRelationship"
-                      placeholder="Enter relationship"
-                      required
-                      value={legalInfo.guardianInfo?.relationship || ''}
-                      onChange={(e) => handleLegalInfoChange({
-                        guardianInfo: {
-                          ...legalInfo.guardianInfo,
-                          relationship: e.target.value
-                        }
-                      })}
-                    />
+                    <Select
+                      value={guardianInfo.relationship}
+                      onValueChange={(value) => setGuardianInfo(prev => ({ ...prev, relationship: value }))}
+                    >
+                      <SelectTrigger id="guardianRelationship" className="min-h-11">
+                        <SelectValue placeholder="Select relationship" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="legal_guardian">Legal Guardian</SelectItem>
+                        <SelectItem value="grandparent">Grandparent</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="guardianPhone">Phone Number *</Label>
                     <Input
                       id="guardianPhone"
+                      type="tel"
                       placeholder="(XXX) XXX-XXXX"
                       required
-                      value={formatPhoneForDisplay(legalInfo.guardianInfo?.phone || '')}
+                      value={formatPhoneForDisplay(guardianInfo.phone)}
                       onChange={(e) => {
                         const formatted = formatPhoneNumber(e.target.value)
-                        handleLegalInfoChange({
-                          guardianInfo: {
-                            ...legalInfo.guardianInfo,
-                            phone: formatted
-                          }
-                        })
+                        setGuardianInfo(prev => ({ ...prev, phone: formatted }))
                       }}
+                      className="min-h-11"
                     />
                   </div>
 
@@ -169,13 +176,9 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
                       type="email"
                       placeholder="Enter guardian's email"
                       required
-                      value={legalInfo.guardianInfo?.email || ''}
-                      onChange={(e) => handleLegalInfoChange({
-                        guardianInfo: {
-                          ...legalInfo.guardianInfo,
-                          email: e.target.value
-                        }
-                      })}
+                      value={guardianInfo.email}
+                      onChange={(e) => setGuardianInfo(prev => ({ ...prev, email: e.target.value }))}
+                      className="min-h-11"
                     />
                   </div>
                 </div>
@@ -184,16 +187,23 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
 
             {/* Power of Attorney */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="hasPOA" className="text-base">Has Power of Attorney</Label>
+              <div className="flex items-center justify-between py-1">
+                <Label htmlFor="hasPOA" className="text-[var(--muted-foreground)]">
+                  <span className="text-base leading-6">Has Power of Attorney</span>
+                </Label>
                 <Switch
                   id="hasPOA"
-                  checked={legalInfo.hasPOA}
-                  onCheckedChange={(checked) => handleLegalInfoChange({ hasPOA: checked })}
+                  checked={hasPowerOfAttorney}
+                  onCheckedChange={(checked) => {
+                    setHasPowerOfAttorney(checked)
+                    if (!checked) {
+                      setPoaInfo({ name: '', phone: '' })
+                    }
+                  }}
                 />
               </div>
 
-              {legalInfo.hasPOA && (
+              {hasPowerOfAttorney && (
                 <div className="grid grid-cols-1 @lg:grid-cols-2 gap-4 mt-4">
                   <div className="space-y-2">
                     <Label htmlFor="poaName">POA Name *</Label>
@@ -201,13 +211,9 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
                       id="poaName"
                       placeholder="Enter POA's name"
                       required
-                      value={legalInfo.poaInfo?.name || ''}
-                      onChange={(e) => handleLegalInfoChange({
-                        poaInfo: {
-                          ...legalInfo.poaInfo,
-                          name: e.target.value
-                        }
-                      })}
+                      value={poaInfo.name}
+                      onChange={(e) => setPoaInfo(prev => ({ ...prev, name: e.target.value }))}
+                      className="min-h-11"
                     />
                   </div>
 
@@ -215,18 +221,15 @@ export function LegalSection({ onSectionToggle, isExpanded }: LegalSectionProps)
                     <Label htmlFor="poaPhone">Phone Number *</Label>
                     <Input
                       id="poaPhone"
+                      type="tel"
                       placeholder="(XXX) XXX-XXXX"
                       required
-                      value={formatPhoneForDisplay(legalInfo.poaInfo?.phone || '')}
+                      value={formatPhoneForDisplay(poaInfo.phone)}
                       onChange={(e) => {
                         const formatted = formatPhoneNumber(e.target.value)
-                        handleLegalInfoChange({
-                          poaInfo: {
-                            ...legalInfo.poaInfo,
-                            phone: formatted
-                          }
-                        })
+                        setPoaInfo(prev => ({ ...prev, phone: formatted }))
                       }}
+                      className="min-h-11"
                     />
                   </div>
                 </div>

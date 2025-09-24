@@ -44,10 +44,10 @@ const cardVariants = {
   },
 
   interactive: {
-    default: "hover:shadow-md hover:border-ring cursor-pointer focus:ring-2 focus:ring-ring focus:outline-none",
-    outlined: "hover:shadow-md hover:border-ring cursor-pointer focus:ring-2 focus:ring-ring focus:outline-none",
-    elevated: "hover:shadow-xl hover:-translate-y-1 cursor-pointer focus:ring-2 focus:ring-ring focus:outline-none",
-    filled: "hover:shadow-md hover:bg-muted/80 cursor-pointer focus:ring-2 focus:ring-ring focus:outline-none"
+    default: "hover:shadow-md hover:border-ring cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]",
+    outlined: "hover:shadow-md hover:border-ring cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]",
+    elevated: "hover:shadow-xl hover:-translate-y-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]",
+    filled: "hover:shadow-md hover:bg-muted/80 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ring-offset-background)]"
   },
 
   sizes: {

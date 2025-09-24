@@ -170,6 +170,20 @@
     /* Map destructive-foreground for consistency */
     --bg-destructive: var(--destructive);
     --text-destructive-foreground: var(--destructive-fg);
+
+    /* Overlay tokens for modals and dialogs */
+    --overlay: var(--bg);
+    --overlay-opacity: 0.80;
+
+    /* Surface tokens for panels and cards */
+    --surface: oklch(100% 0 0);
+
+    /* Popover tokens for dropdowns and popovers */
+    --popover: var(--surface);
+    --popover-foreground: var(--fg);
+
+    /* Accent tokens for hover and highlight states */
+    --accent-foreground: var(--fg);
   }
 
   /* Dark mode OKLCH overrides */
@@ -262,6 +276,20 @@
     /* Map destructive-foreground for consistency */
     --bg-destructive: var(--destructive);
     --text-destructive-foreground: var(--destructive-fg);
+
+    /* Overlay tokens for modals and dialogs */
+    --overlay: var(--bg);
+    --overlay-opacity: 0.80;
+
+    /* Surface tokens for panels and cards */
+    --surface: oklch(12% 0.01 89);
+
+    /* Popover tokens for dropdowns and popovers */
+    --popover: var(--surface);
+    --popover-foreground: var(--fg);
+
+    /* Accent tokens for hover and highlight states */
+    --accent-foreground: var(--fg);
   }
 
   /* Universal box-sizing reset */
@@ -310,9 +338,7 @@
   }
 
   /* Focus styles - WCAG 2.2 AA compliant with accessible ring */
-  *:focus {
-    outline: none;
-  }
+  /* Removed dangerous *:focus outline:none - focus handled by components */
 
   *:focus-visible {
     outline: 2px solid var(--focus);
@@ -357,22 +383,15 @@
     font: inherit;
   }
 
-  button:focus,
-  button:active,
-  [role="button"]:focus,
-  [role="button"]:active {
-    outline: none;
-    box-shadow: none;
-    border: none;
-  }
+  /* Focus styles for buttons handled by component classes */
+  /* Use focus-visible:ring-2 focus-visible:ring-offset-2 in components */
 
   /* Keep focus-visible separate for accessibility */
   button:focus-visible,
   [role="button"]:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
-    box-shadow: none;
-    border: none;
+    /* Proper focus ring without dangerous resets */
   }
 
   button:disabled,
@@ -435,18 +454,13 @@
     transform: translate(-50%, -60%) rotate(-45deg);
   }
 
-  input[type="checkbox"]:focus,
-  input[type="checkbox"]:active {
-    outline: none;
-    box-shadow: none;
-    border: none;
-  }
+  /* Checkbox focus styles handled by Checkbox primitive */
+  /* Use focus-visible utilities in components */
 
   input[type="checkbox"]:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
-    box-shadow: none;
-    border: none;
+    /* Accessible focus indicator preserved */
   }
 
   input[type="checkbox"]:disabled {

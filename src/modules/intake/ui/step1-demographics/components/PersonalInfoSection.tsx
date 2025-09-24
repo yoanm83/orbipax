@@ -12,9 +12,10 @@ import { User, ChevronUp, ChevronDown } from "lucide-react"
 interface PersonalInfoSectionProps {
   onSectionToggle: () => void
   isExpanded: boolean
+  onDOBChange?: (date: Date | null) => void
 }
 
-export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInfoSectionProps) {
+export function PersonalInfoSection({ onSectionToggle, isExpanded, onDOBChange }: PersonalInfoSectionProps) {
   // TODO: Replace with server-driven form state
   const [personalInfo, setPersonalInfo] = useState<{
     fullName: string;
@@ -55,7 +56,11 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInf
   const handlePersonalInfoChange = (data: any) => {
     // TODO: Replace with server-driven form handling
     setPersonalInfo(prev => ({ ...prev, ...data }))
-    console.log('Personal info change:', data)
+
+    // Notify parent component when DOB changes
+    if (data.dateOfBirth !== undefined && onDOBChange) {
+      onDOBChange(data.dateOfBirth)
+    }
   }
 
   // Options for dropdowns
@@ -95,23 +100,31 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded }: PersonalInf
   }
 
   return (
-    <Card className="w-full rounded-2xl shadow-md mb-6">
+    <Card className="w-full rounded-3xl shadow-md mb-6">
       <div
-        className="p-6 flex justify-between items-center cursor-pointer"
+        id="header-personal"
+        className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onSectionToggle()
+          }
+        }}
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
+        aria-controls="panel-personal"
       >
         <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-primary" style={{ color: 'var(--legacy-primary)' }} />
-          <h2 className="text-xl font-semibold">Personal Information</h2>
+          <User className="h-5 w-5 text-[var(--primary)]" />
+          <h2 className="text-lg font-medium text-[var(--foreground)]">Personal Information</h2>
         </div>
         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
       </div>
 
       {isExpanded && (
-        <CardBody className="p-6">
+        <CardBody id="panel-personal" aria-labelledby="header-personal" className="p-6">
           {/* Photo Upload */}
           <div className="flex flex-col items-center mb-8 pb-6 border-b border-border">
             <div className="relative group">

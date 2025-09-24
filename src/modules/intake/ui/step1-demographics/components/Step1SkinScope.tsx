@@ -89,14 +89,15 @@ export function Step1SkinScope({ children }: Step1SkinScopeProps) {
           box-shadow: var(--legacy-card-shadow);
         }
 
-        /* Focus state overrides for all interactive elements */
+        /* Focus state for all interactive elements - accessible ring */
         .step1-skin-scope button:focus-visible,
         .step1-skin-scope input:focus-visible,
         .step1-skin-scope select:focus-visible,
         .step1-skin-scope textarea:focus-visible,
         .step1-skin-scope [tabindex]:focus-visible,
         .step1-skin-scope [role="button"]:focus-visible {
-          outline: none !important;
+          outline: 2px solid transparent !important;
+          outline-offset: 2px !important;
           box-shadow:
             0 0 0 4px rgba(255, 255, 255, 1),
             0 0 0 6px var(--legacy-focus) !important;
@@ -347,9 +348,10 @@ export function Step1SkinScope({ children }: Step1SkinScopeProps) {
           opacity: 0.5;
         }
 
-        /* Focus state for calendar days */
+        /* Focus state for calendar days - accessible */
         .step1-skin-scope .rdp-button:focus-visible {
-          outline: none;
+          outline: 2px solid transparent;
+          outline-offset: 0;
           box-shadow: 0 0 0 2px var(--cal-bg), 0 0 0 4px var(--cal-selected-bg);
         }
 
