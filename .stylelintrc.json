@@ -1,0 +1,83 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "plugins": ["stylelint-declaration-strict-value"],
+  "rules": {
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "color",
+        "background",
+        "background-color",
+        "border-color",
+        "outline-color",
+        "fill",
+        "stroke",
+        "box-shadow",
+        "text-shadow",
+        "/^border/",
+        "/^outline/"
+      ],
+      {
+        "ignoreValues": [
+          "transparent",
+          "inherit",
+          "initial",
+          "unset",
+          "none",
+          "currentColor",
+          "/^var\\(--/",
+          "0"
+        ],
+        "message": "Use CSS custom properties (var(--token)) for colors. No hardcoded #hex, rgb(), hsl(), or oklch() values."
+      }
+    ],
+    "declaration-property-value-disallowed-list": {
+      "outline": ["none"],
+      "box-shadow": ["none"],
+      "/^outline/": ["none"]
+    },
+    "color-function-notation": "modern",
+    "color-hex-length": "long",
+    "color-no-invalid-hex": true,
+    "color-no-hex": [true, { "message": "Use CSS variables instead of hex colors" }],
+    "unit-allowed-list": [
+      "px", "rem", "em", "%", "vw", "vh", "deg", "s", "ms", "fr", "ch"
+    ],
+    "declaration-no-important": [true, { "severity": "warning" }],
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen",
+          "layer",
+          "config"
+        ]
+      }
+    ],
+    "custom-property-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
+    "selector-max-specificity": ["0,3,0", { "severity": "warning" }],
+    "selector-max-id": 0,
+    "max-nesting-depth": [3, { "severity": "warning" }],
+    "declaration-block-no-duplicate-properties": true,
+    "declaration-block-no-shorthand-property-overrides": true,
+    "declaration-colon-space-after": "always",
+    "declaration-colon-space-before": "never",
+    "block-no-empty": true,
+    "comment-no-empty": true,
+    "no-duplicate-selectors": true,
+    "no-empty-source": true,
+    "no-invalid-double-slash-comments": true
+  },
+  "ignoreFiles": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    ".next/**",
+    "coverage/**",
+    "*.min.css",
+    "tmp/**"
+  ]
+}

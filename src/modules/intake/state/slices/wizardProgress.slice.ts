@@ -60,7 +60,7 @@ const initialState: WizardProgressState = {
 
   // Flags
   isCurrentStepValid: false,
-  allowSkipAhead: false,
+  allowSkipAhead: true,  // Free navigation enabled
   showProgress: true,
   isTransitioning: false,
 
@@ -77,20 +77,8 @@ export const useWizardProgressStore = create<WizardProgressStore>((set, get) => 
   ...initialState,
 
   goToStep: (step: WizardStep) => {
-    const { allowSkipAhead, visitedSteps } = get();
-    const currentIndex = STEP_ORDER.indexOf(get().currentStep);
-    const targetIndex = STEP_ORDER.indexOf(step);
-
-    // Allow navigation if:
-    // 1. Going backwards
-    // 2. Skip ahead is enabled
-    // 3. Step was already visited
-    const canNavigate =
-      targetIndex <= currentIndex ||
-      allowSkipAhead ||
-      visitedSteps.includes(step);
-
-    if (!canNavigate) return;
+    // Free navigation: always allow navigating to any step
+    // No restrictions for UI-only navigation
 
     set((state) => ({
       currentStep: step,
@@ -111,7 +99,9 @@ export const useWizardProgressStore = create<WizardProgressStore>((set, get) => 
     const currentIndex = STEP_ORDER.indexOf(get().currentStep);
     if (currentIndex < STEP_ORDER.length - 1) {
       const nextStep = STEP_ORDER[currentIndex + 1];
-      get().goToStep(nextStep);
+      if (nextStep) {
+        get().goToStep(nextStep);
+      }
     }
   },
 
@@ -119,7 +109,9 @@ export const useWizardProgressStore = create<WizardProgressStore>((set, get) => 
     const currentIndex = STEP_ORDER.indexOf(get().currentStep);
     if (currentIndex > 0) {
       const prevStep = STEP_ORDER[currentIndex - 1];
-      get().goToStep(prevStep);
+      if (prevStep) {
+        get().goToStep(prevStep);
+      }
     }
   },
 

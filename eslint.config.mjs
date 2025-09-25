@@ -7,6 +7,7 @@ import tsParser from "@typescript-eslint/parser";
 import importPlugin from "eslint-plugin-import";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import unused from "eslint-plugin-unused-imports";
+import regexp from "eslint-plugin-regexp";
 
 export default [
   // Global ignores
@@ -41,7 +42,8 @@ export default [
       "@typescript-eslint": ts,
       "import": importPlugin,
       "jsx-a11y": jsxA11y,
-      "unused-imports": unused
+      "unused-imports": unused,
+      "regexp": regexp
     },
     rules: {
       // =================================================================
@@ -109,13 +111,42 @@ export default [
       // =================================================================
       "jsx-a11y/alt-text": "warn",
       "jsx-a11y/anchor-is-valid": "warn",
-      "jsx-a11y/click-events-have-key-events": "warn",
+      "jsx-a11y/click-events-have-key-events": "error",
       "jsx-a11y/no-static-element-interactions": "warn",
       "jsx-a11y/role-supports-aria-props": "warn",
       "jsx-a11y/aria-props": "warn",
       "jsx-a11y/heading-has-content": "warn",
-      "jsx-a11y/label-has-associated-control": "warn",
-      "jsx-a11y/no-redundant-roles": "warn"
+      "jsx-a11y/label-has-associated-control": "error",
+      "jsx-a11y/no-redundant-roles": "warn",
+      "jsx-a11y/no-autofocus": "error",
+      "jsx-a11y/aria-role": "error",
+      "jsx-a11y/control-has-associated-label": "error",
+
+      // =================================================================
+      // ANTI-HARDCODE VISUAL RULES
+      // =================================================================
+      // Prohibit hardcoded colors in className strings
+      "regexp/no-dupe-disjunctions": "error",
+      "regexp/no-contradiction-with-assertion": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "Literal[value=/(#[0-9a-fA-F]{3,8}|rgba?\\(|hsla?\\(|oklch\\([^v])/]",
+          "message": "Hardcoded colors prohibited. Use CSS variables: var(--token) or Tailwind classes with tokens."
+        },
+        {
+          "selector": "TemplateElement[value.raw=/(#[0-9a-fA-F]{3,8}|rgba?\\(|hsla?\\(|oklch\\([^v])/]",
+          "message": "Hardcoded colors in template literals prohibited. Use CSS variables or Tailwind tokens."
+        },
+        {
+          "selector": "Literal[value=/outline:\\s*none/]",
+          "message": "outline:none prohibited. Use focus-visible utilities or ring-0 with proper :focus-visible states."
+        },
+        {
+          "selector": "Literal[value=/box-shadow:\\s*none/]",
+          "message": "box-shadow:none prohibited for focus states. Use shadow-none class or proper focus management."
+        }
+      ]
     }
   },
 
@@ -143,11 +174,30 @@ export default [
         ]
       }],
 
-      // Server Components and RSC hints
-      "no-restricted-syntax": ["warn", {
-        "selector": "CallExpression[callee.name='fetch']",
-        "message": "Avoid direct fetch in UI components. Use Server Actions or Application layer services instead."
-      }]
+      // Prohibit native HTML elements in modules UI - force primitives usage
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "CallExpression[callee.name='fetch']",
+          "message": "Avoid direct fetch in UI components. Use Server Actions or Application layer services instead."
+        },
+        {
+          "selector": "JSXOpeningElement[name.name='select']",
+          "message": "Use @/shared/ui/primitives/Select instead of native <select> element."
+        },
+        {
+          "selector": "JSXOpeningElement[name.name='input']",
+          "message": "Use appropriate primitive components: Input, Checkbox, RadioGroup instead of native <input>."
+        },
+        {
+          "selector": "JSXOpeningElement[name.name='button']",
+          "message": "Use @/shared/ui/primitives/Button instead of native <button> element."
+        },
+        {
+          "selector": "JSXOpeningElement[name.name='textarea']",
+          "message": "Use @/shared/ui/primitives/Textarea instead of native <textarea> element."
+        }
+      ]
     }
   },
 

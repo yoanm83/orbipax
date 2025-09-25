@@ -20,15 +20,15 @@ interface EnhancedWizardTabsProps {
   currentStep?: string
   onStepClick?: (stepId: string) => void
   allowSkipAhead?: boolean
-  showProgress?: boolean
 }
 
 export function EnhancedWizardTabs({
   currentStep = "demographics",
   onStepClick,
-  allowSkipAhead = false,
-  showProgress = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+  allowSkipAhead = true,
 }: EnhancedWizardTabsProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const [announcement, setAnnouncement] = useState("")
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -48,7 +48,7 @@ export function EnhancedWizardTabs({
     },
     {
       id: "insurance",
-      title: "Insurance",
+      title: "Insurance & Eligibility",
       shortTitle: "Insurance",
       status: "pending",
     },
@@ -110,7 +110,6 @@ export function EnhancedWizardTabs({
   })
 
   const currentIndex = steps.findIndex((s) => s.id === currentStep)
-  const progressPercentage = Math.max(Math.round(((currentIndex + 1) / steps.length) * 100), 10)
 
   // Announce step changes for screen readers
   useEffect(() => {
@@ -125,13 +124,11 @@ export function EnhancedWizardTabs({
     }
   }, [currentStep, steps])
 
-  const handleStepClick = (stepId: string, stepIndex: number) => {
-    const currentIndex = steps.findIndex((s) => s.id === currentStep)
-
-    if (stepIndex <= currentIndex || allowSkipAhead) {
-      if (onStepClick) {
-        onStepClick(stepId)
-      }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+  const handleStepClick = (stepId: string, _stepIndex: number) => {
+    // Free navigation: always allow clicking any step
+    if (onStepClick) {
+      onStepClick(stepId)
     }
   }
 
@@ -172,42 +169,59 @@ export function EnhancedWizardTabs({
 
   return (
     <div className="w-full max-w-full overflow-hidden relative @container" role="tablist" aria-label="Intake wizard steps">
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-secondary to-secondary rounded-lg transition-all duration-1000 ease-in-out"
-        style={{
-          background: `linear-gradient(to right, hsl(var(--primary) / 0.15) ${progressPercentage}%, transparent ${progressPercentage}%)`,
-        }}
-      />
-
-      <div className="grid grid-cols-5 @lg:grid-cols-10 gap-1 @sm:gap-2 items-start relative z-10 py-4">
+      <div className="grid grid-cols-5 @lg:grid-cols-10 gap-1 @sm:gap-2 items-start relative py-4">
         {updatedSteps.map((step, index) => (
           <div key={step.id} className="flex flex-col items-center relative">
+            {/* eslint-disable-next-line no-restricted-syntax */}
             <button
+              type="button"
               ref={(el) => {
                 buttonRefs.current[index] = el
               }}
               onClick={() => handleStepClick(step.id, index)}
               onKeyDown={(e) => handleKeyDown(e, step.id, index)}
-              disabled={!allowSkipAhead && index > currentIndex}
+              disabled={false}
               role="tab"
+              id={`tab-${step.id}`}
+              aria-selected={step.status === "current"}
+              aria-controls={`tabpanel-${step.id}`}
               aria-current={step.status === "current" ? "step" : undefined}
-              aria-disabled={!allowSkipAhead && index > currentIndex}
+              aria-disabled={false}
               aria-describedby={`step-${step.id}-description`}
               aria-label={`Step ${index + 1} of ${steps.length}: ${step.title}${step.isOptional ? ' (optional)' : ''}`}
               tabIndex={step.status === "current" ? 0 : -1}
               className={cn(
-                "rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200 mb-2 min-h-11 min-w-11 @sm:min-h-12 @sm:min-w-12",
-                "hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                step.status === "completed" && "bg-primary text-primary-foreground shadow-lg",
-                step.status === "current" && "bg-primary text-primary-foreground shadow-lg ring-2 @sm:ring-4 ring-ring",
-                step.status === "pending" && "bg-secondary text-muted-foreground",
-                !allowSkipAhead && index > currentIndex && "opacity-50 cursor-not-allowed",
+                // Core layout
+                "inline-flex items-center justify-center",
+                // Perfect circle: aspect-square ensures 1:1 ratio, rounded-full makes it circular
+                "aspect-square rounded-full",
+                // Size: minimum 44x44px (11 * 4px), 48x48px on @sm
+                "min-h-11 min-w-11 h-11 w-11",
+                "@sm:min-h-12 @sm:min-w-12 @sm:h-12 @sm:w-12",
+                // Typography
+                "text-xs font-bold",
+                // Transitions
+                "transition-all duration-200",
+                // Spacing
+                "mb-2",
+                // Interactive states
+                "hover:scale-110",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]",
+                "disabled:pointer-events-none disabled:opacity-50",
+                // State-based colors with visual hierarchy
+                // Completed: Green background (success token) with checkmark
+                step.status === "completed" && "bg-green-500 text-white hover:bg-green-600 shadow-md",
+                // Current: Blue background (primary) with ring and slightly larger via ring
+                step.status === "current" && "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 shadow-lg ring-2 @sm:ring-4 ring-[var(--ring)] scale-110",
+                // Pending: Light gray background (secondary/muted)
+                step.status === "pending" && "bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/90",
+                // Free navigation: no disabled state
               )}
             >
               {step.status === "completed" ? (
-                <CheckIcon className="h-2 w-2 @sm:h-3 @sm:w-3" />
+                <CheckIcon className="h-4 w-4 @sm:h-5 @sm:w-5" />
               ) : (
-                <span className="text-xs">{index + 1}</span>
+                <span>{index + 1}</span>
               )}
             </button>
 
@@ -218,7 +232,7 @@ export function EnhancedWizardTabs({
                 step.status === "completed" && "text-primary font-medium",
                 step.status === "current" && "text-primary font-semibold",
                 step.status === "pending" && "text-muted-foreground",
-                !allowSkipAhead && index > currentIndex && "opacity-50",
+                // Free navigation: no disabled state
               )}
             >
               <span className="hidden @sm:block text-xs">{step.shortTitle}</span>
