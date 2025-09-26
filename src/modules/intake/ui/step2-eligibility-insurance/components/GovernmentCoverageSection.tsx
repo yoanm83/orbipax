@@ -1,6 +1,7 @@
 'use client'
 
 import { Wallet, ChevronUp, ChevronDown } from "lucide-react"
+import { useMemo } from "react"
 
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
 import { DatePicker } from "@/shared/ui/primitives/DatePicker"
@@ -18,10 +19,12 @@ interface GovernmentCoverageSectionProps {
  * SoC: UI layer only - no business logic or API calls
  */
 export function GovernmentCoverageSection({ onSectionToggle, isExpanded }: GovernmentCoverageSectionProps) {
+  // Generate unique section ID for this instance
+  const sectionUid = useMemo(() => `gov_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, [])
   return (
     <Card className="w-full rounded-3xl shadow-md mb-6">
       <div
-        id="header-government"
+        id={`gov-${sectionUid}-header`}
         className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
         onKeyDown={(e) => {
@@ -33,7 +36,7 @@ export function GovernmentCoverageSection({ onSectionToggle, isExpanded }: Gover
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
-        aria-controls="panel-government"
+        aria-controls={`gov-${sectionUid}-panel`}
       >
         <div className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-[var(--primary)]" />
@@ -45,7 +48,7 @@ export function GovernmentCoverageSection({ onSectionToggle, isExpanded }: Gover
       </div>
 
       {isExpanded && (
-        <CardBody id="panel-government" aria-labelledby="header-government" className="p-6">
+        <CardBody id={`gov-${sectionUid}-panel`} aria-labelledby={`gov-${sectionUid}-header`} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Field 1: Medicaid ID */}
             <div>

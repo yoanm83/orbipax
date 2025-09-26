@@ -1,7 +1,7 @@
 'use client'
 
 import { FileText, ChevronUp, ChevronDown, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 
 import { Button } from "@/shared/ui/primitives/Button"
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
@@ -33,6 +33,9 @@ interface AuthorizationsSectionProps {
  * SoC: UI layer only - no business logic or API calls
  */
 export function AuthorizationsSection({ onSectionToggle, isExpanded }: AuthorizationsSectionProps) {
+  // Generate unique section ID for this instance
+  const sectionUid = useMemo(() => generateUid(), [])
+
   // Local state for dynamic list management
   const [records, setRecords] = useState<AuthorizationRecord[]>([
     { uid: generateUid(), index: 1 }
@@ -63,7 +66,7 @@ export function AuthorizationsSection({ onSectionToggle, isExpanded }: Authoriza
   return (
     <Card className="w-full rounded-3xl shadow-md mb-6">
       <div
-        id="auth-header"
+        id={`auth-${sectionUid}-header`}
         className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
         onKeyDown={(e) => {
@@ -75,7 +78,7 @@ export function AuthorizationsSection({ onSectionToggle, isExpanded }: Authoriza
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
-        aria-controls="auth-panel"
+        aria-controls={`auth-${sectionUid}-panel`}
       >
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-[var(--primary)]" />
@@ -87,7 +90,7 @@ export function AuthorizationsSection({ onSectionToggle, isExpanded }: Authoriza
       </div>
 
       {isExpanded && (
-        <CardBody id="auth-panel" aria-labelledby="auth-header" className="p-6">
+        <CardBody id={`auth-${sectionUid}-panel`} aria-labelledby={`auth-${sectionUid}-header`} className="p-6">
           <div className="space-y-6">
             {/* Dynamic authorization records */}
             {records.map((record, idx) => (

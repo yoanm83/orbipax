@@ -2,10 +2,10 @@ import 'server-only';
 
 import { redirect } from 'next/navigation';
 
-import { getServiceClient } from '@/shared/lib/supabase.server';
+import { createServerClient } from '@/shared/lib/supabase.client';
 
 export async function getSession() {
-  const supabase = getServiceClient();
+  const supabase = await createServerClient();
   const { data } = await supabase.auth.getSession();
   return data.session ?? null;
 }

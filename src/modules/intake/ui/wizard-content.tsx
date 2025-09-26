@@ -7,6 +7,7 @@ import { useCurrentStep } from '@/modules/intake/state';
 
 import { IntakeWizardStep1Demographics } from './step1-demographics';
 import { Step2EligibilityInsurance } from './step2-eligibility-insurance';
+import { Step3DiagnosesClinical } from './step3-diagnoses-clinical';
 
 // Enhanced Wizard Tabs (Stepper Navigation) - Production Ready
 export { EnhancedWizardTabs } from './enhanced-wizard-tabs'
@@ -28,8 +29,10 @@ export function IntakeWizardContent() {
       case 'insurance':
         return <Step2EligibilityInsurance />;
 
-      case 'welcome':
       case 'diagnoses':
+        return <Step3DiagnosesClinical />;
+
+      case 'welcome':
       case 'medical-providers':
       case 'medications':
       case 'referrals':

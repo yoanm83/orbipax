@@ -1,7 +1,7 @@
 'use client'
 
 import { Shield, ChevronUp, ChevronDown, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 
 import { Button } from "@/shared/ui/primitives/Button"
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
@@ -32,6 +32,9 @@ interface InsuranceRecordsSectionProps {
  * SoC: UI layer only - no business logic or API calls
  */
 export function InsuranceRecordsSection({ onSectionToggle, isExpanded }: InsuranceRecordsSectionProps) {
+  // Generate unique section ID for this instance
+  const sectionUid = useMemo(() => generateUid(), [])
+
   // Local state for dynamic list management
   const [records, setRecords] = useState<InsuranceRecord[]>([
     { uid: generateUid(), index: 1 }
@@ -62,7 +65,7 @@ export function InsuranceRecordsSection({ onSectionToggle, isExpanded }: Insuran
   return (
     <Card className="w-full rounded-3xl shadow-md mb-6">
       <div
-        id="ins-header"
+        id={`ins-${sectionUid}-header`}
         className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
         onKeyDown={(e) => {
@@ -74,7 +77,7 @@ export function InsuranceRecordsSection({ onSectionToggle, isExpanded }: Insuran
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
-        aria-controls="ins-panel"
+        aria-controls={`ins-${sectionUid}-panel`}
       >
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-[var(--primary)]" />
@@ -86,7 +89,7 @@ export function InsuranceRecordsSection({ onSectionToggle, isExpanded }: Insuran
       </div>
 
       {isExpanded && (
-        <CardBody id="ins-panel" aria-labelledby="ins-header" className="p-6">
+        <CardBody id={`ins-${sectionUid}-panel`} aria-labelledby={`ins-${sectionUid}-header`} className="p-6">
           <div className="space-y-6">
             {/* Dynamic insurance records */}
             {records.map((record, idx) => (

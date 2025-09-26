@@ -1,6 +1,7 @@
 'use client'
 
 import { FileCheck, ChevronUp, ChevronDown } from "lucide-react"
+import { useMemo } from "react"
 
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
 import { DatePicker } from "@/shared/ui/primitives/DatePicker"
@@ -24,10 +25,12 @@ interface EligibilityRecordsSectionProps {
  * SoC: UI layer only - no business logic or API calls
  */
 export function EligibilityRecordsSection({ onSectionToggle, isExpanded }: EligibilityRecordsSectionProps) {
+  // Generate unique section ID for this instance
+  const sectionUid = useMemo(() => `elig_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, [])
   return (
     <Card className="w-full rounded-3xl shadow-md mb-6">
       <div
-        id="header-eligibility"
+        id={`elig-${sectionUid}-header`}
         className="py-3 px-6 flex justify-between items-center cursor-pointer min-h-[44px]"
         onClick={onSectionToggle}
         onKeyDown={(e) => {
@@ -39,7 +42,7 @@ export function EligibilityRecordsSection({ onSectionToggle, isExpanded }: Eligi
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
-        aria-controls="panel-eligibility"
+        aria-controls={`elig-${sectionUid}-panel`}
       >
         <div className="flex items-center gap-2">
           <FileCheck className="h-5 w-5 text-[var(--primary)]" />
@@ -51,7 +54,7 @@ export function EligibilityRecordsSection({ onSectionToggle, isExpanded }: Eligi
       </div>
 
       {isExpanded && (
-        <CardBody id="panel-eligibility" aria-labelledby="header-eligibility" className="p-6">
+        <CardBody id={`elig-${sectionUid}-panel`} aria-labelledby={`elig-${sectionUid}-header`} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Field 1: Eligibility Date */}
             <div>
