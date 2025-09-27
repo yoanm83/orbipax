@@ -1,0 +1,1 @@
+export { Step7LegalConsents } from './Step7LegalConsents'

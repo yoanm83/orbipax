@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 import { resolveUserAndOrg } from "@/shared/lib/current-user.server";
-import { getServiceClient } from "@/shared/lib/supabase.server";
+import { createServerClient } from "@/shared/lib/supabase.client";
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(64, "Name must be at most 64 characters").trim(),
@@ -31,7 +31,7 @@ export async function createOrganization(input: { name: string }): Promise<{ id:
   }
 
   const { name } = parsed.data;
-  const sb = getServiceClient();
+  const sb = await createServerClient();
 
   // Get current user
   const { userId } = await resolveUserAndOrg();
@@ -69,7 +69,7 @@ async function createOrganizationManual(sb: any, name: string, baseSlug: string,
 
   while (true) {
     const { data: existing } = await sb
-      .from("orbipax_core.organizations")
+      .schema('orbipax_core').from('organizations')
       .select("id")
       .eq("slug", slug)
       .maybeSingle();
@@ -156,7 +156,7 @@ async function createOrganizationManual(sb: any, name: string, baseSlug: string,
 async function createOrganizationSequential(sb: any, name: string, slug: string, userId: string): Promise<{ id: string; slug: string }> {
   // 1. Insert organization
   const { data: orgData, error: orgError } = await sb
-    .from("orbipax_core.organizations")
+    .schema('orbipax_core').from('organizations')
     .insert({
       name,
       slug,
@@ -173,7 +173,7 @@ async function createOrganizationSequential(sb: any, name: string, slug: string,
   try {
     // 2. Upsert user profile
     const { error: profileError } = await sb
-      .from("orbipax_core.user_profiles")
+      .schema('orbipax_core').from('user_profiles')
       .upsert({
         user_id: userId,
         organization_id: orgData.id,
@@ -189,7 +189,7 @@ async function createOrganizationSequential(sb: any, name: string, slug: string,
 
     // 3. Insert audit log
     const { error: auditError } = await sb
-      .from("orbipax_core.audit_logs")
+      .schema('orbipax_core').from('audit_logs')
       .insert({
         organization_id: orgData.id,
         actor_user_id: userId,
@@ -216,7 +216,7 @@ async function createOrganizationSequential(sb: any, name: string, slug: string,
     // Attempt to cleanup the organization if subsequent operations failed
     try {
       await sb
-        .from("orbipax_core.organizations")
+        .schema('orbipax_core').from('organizations')
         .delete()
         .eq("id", orgData.id);
     } catch (cleanupError) {
@@ -235,14 +235,14 @@ export async function switchOrganization(input: { organizationId: string }): Pro
   }
 
   const { organizationId } = parsed.data;
-  const sb = getServiceClient();
+  const sb = await createServerClient();
 
   // Get current user
   const { userId } = await resolveUserAndOrg();
 
   // 1. Verify target organization exists
   const { data: orgData, error: orgError } = await sb
-    .from("orbipax_core.organizations")
+    .schema('orbipax_core').from('organizations')
     .select("id")
     .eq("id", organizationId)
     .maybeSingle();
@@ -270,7 +270,7 @@ export async function switchOrganization(input: { organizationId: string }): Pro
 
   // 3. Update user profile with new organization_id (preserve full_name and role)
   const { error: profileError } = await sb
-    .from("orbipax_core.user_profiles")
+    .schema('orbipax_core').from('user_profiles')
     .upsert({
       user_id: userId,
       organization_id: organizationId,
@@ -286,7 +286,7 @@ export async function switchOrganization(input: { organizationId: string }): Pro
 
   // 4. Insert audit log
   const { error: auditError } = await sb
-    .from("orbipax_core.audit_logs")
+    .schema('orbipax_core').from('audit_logs')
     .insert({
       organization_id: organizationId,
       actor_user_id: userId,
@@ -311,11 +311,11 @@ export async function switchOrganization(input: { organizationId: string }): Pro
 }
 
 export async function listAccessibleOrganizations(): Promise<Array<{ id: string; name: string; slug: string }>> {
-  const sb = getServiceClient();
+  const sb = await createServerClient();
 
   // Use v_my_organizations view to get only organizations where user is a member
   const { data: organizations, error } = await sb
-    .from("orbipax_core.v_my_organizations")
+    .schema('orbipax_core').from('v_my_organizations')
     .select("*")
     .order("name", { ascending: true });
 

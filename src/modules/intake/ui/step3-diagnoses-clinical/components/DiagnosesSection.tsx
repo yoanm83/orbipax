@@ -150,8 +150,27 @@ export function DiagnosesSection({ onSectionToggle, isExpanded }: DiagnosesSecti
     })
   }
 
+  // Validate ICD-10/DSM-5 code format
+  function isValidDiagnosisCode(code: string): boolean {
+    if (!code) return true // Empty is handled by required validation
+
+    // ICD-10 pattern: Letter (except U) + 2 digits + optional (. + up to 4 alphanumeric)
+    // DSM-5 pattern: F + 2 digits + optional (. + 1-2 digits)
+    // Examples: F32.9, F90.0, F43.10, G47.33, M79.3
+    const icd10Pattern = /^[A-TV-Z]\d{2}(?:\.\d{1,4})?$/
+    const dsmPattern = /^F\d{2}(?:\.\d{1,2})?$/
+
+    const normalizedCode = code.trim().toUpperCase()
+    return icd10Pattern.test(normalizedCode) || dsmPattern.test(normalizedCode)
+  }
+
   // Update record field
   function updateRecordField(uid: string, field: keyof DiagnosisRecord, value: string | boolean) {
+    // Special handling for diagnosis code - normalize input
+    if (field === 'code' && typeof value === 'string') {
+      value = value.trim().toUpperCase()
+    }
+
     setRecords(prev =>
       prev.map(record =>
         record.uid === uid ? { ...record, [field]: value } : record
@@ -307,36 +326,32 @@ export function DiagnosesSection({ onSectionToggle, isExpanded }: DiagnosesSecti
                       <Label htmlFor={`dx-${record.uid}-code`}>
                         Diagnosis Code<span className="text-[var(--destructive)]">*</span>
                       </Label>
-                      <Select
+                      <Input
+                        id={`dx-${record.uid}-code`}
+                        type="text"
+                        placeholder="e.g., F32.9"
                         value={record.code}
-                        onValueChange={(value) => {
-                          updateRecordField(record.uid, "code", value)
-                          // Auto-fill description for known codes
-                          const codeDescriptions: { [key: string]: string } = {
-                            "F99": "Mental Disorder, Not Otherwise Specified",
-                            "F32.9": "Major Depressive Disorder, Unspecified",
-                            "F41.1": "Generalized Anxiety Disorder"
-                          }
-                          if (codeDescriptions[value]) {
-                            updateRecordField(record.uid, "description", codeDescriptions[value])
-                          }
-                        }}
-                      >
-                        <SelectTrigger
-                          id={`dx-${record.uid}-code`}
-                          className="mt-1"
-                          aria-label="Diagnosis Code"
-                          aria-required="true"
-                        >
-                          <SelectValue placeholder="Select code" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="F99">F99 - Mental Disorder, NOS</SelectItem>
-                          <SelectItem value="F32.9">F32.9 - Major Depressive Disorder</SelectItem>
-                          <SelectItem value="F41.1">F41.1 - Generalized Anxiety Disorder</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        onChange={(e) => updateRecordField(record.uid, "code", e.target.value)}
+                        className="mt-1"
+                        aria-label="Diagnosis Code"
+                        aria-required="true"
+                        aria-invalid={(!record.code || (record.code && !isValidDiagnosisCode(record.code))) ? "true" : undefined}
+                        aria-describedby={
+                          !record.code ? `dx-${record.uid}-code-error` :
+                          (record.code && !isValidDiagnosisCode(record.code)) ? `dx-${record.uid}-code-format-error` :
+                          undefined
+                        }
+                      />
+                      {!record.code && (
+                        <p id={`dx-${record.uid}-code-error`} className="text-sm text-[var(--destructive)] mt-1">
+                          Diagnosis code is required
+                        </p>
+                      )}
+                      {record.code && !isValidDiagnosisCode(record.code) && (
+                        <p id={`dx-${record.uid}-code-format-error`} className="text-sm text-[var(--destructive)] mt-1">
+                          Invalid format. Use ICD-10 (e.g., F32.9, G47.33) or DSM-5 format
+                        </p>
+                      )}
                     </div>
 
                     {/* Description */}
@@ -351,7 +366,6 @@ export function DiagnosesSection({ onSectionToggle, isExpanded }: DiagnosesSecti
                         onChange={(e) => updateRecordField(record.uid, "description", e.target.value)}
                         className="mt-1"
                         aria-label="Description"
-                        readOnly={record.code !== "other" && record.code !== ""}
                       />
                     </div>
 

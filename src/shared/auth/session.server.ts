@@ -6,13 +6,21 @@ import { createServerClient } from '@/shared/lib/supabase.client';
 
 export async function getSession() {
   const supabase = await createServerClient();
-  const { data } = await supabase.auth.getSession();
-  return data.session ?? null;
+  // Use getUser() for secure server-side validation instead of getSession()
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  // Return null if no authenticated user
+  if (error || !user) {
+    return null;
+  }
+
+  // Return user data in session-like format for backward compatibility
+  return { user };
 }
 
 export async function requireSession() {
   const session = await getSession();
-  if (!session) {
+  if (!session || !session.user) {
     redirect('/(public)/login');
   }
   return { userId: session.user.id };
@@ -20,7 +28,7 @@ export async function requireSession() {
 
 export async function redirectIfAuthenticated() {
   const session = await getSession();
-  if (session) {
+  if (session && session.user) {
     redirect('/');
   }
 }

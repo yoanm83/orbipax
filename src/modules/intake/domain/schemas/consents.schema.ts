@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { validateName, normalizeName, NAME_LENGTHS } from '@/shared/utils/name'
 import {
   ConsentType,
   BooleanResponse,
@@ -20,7 +21,11 @@ import {
 
 export const consentSignatureSchema = z.object({
   // Signature Information
-  signerName: z.string().min(1, 'Signer name is required').max(100),
+  signerName: z.string()
+    .min(1, 'Signer name is required')
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in signer name'),
   signerRole: z.enum([
     'patient',
     'parent',
@@ -92,7 +97,11 @@ export const individualConsentSchema = z.object({
   canBeWithdrawn: z.boolean().default(true),
   withdrawalDate: z.date().optional(),
   withdrawalReason: z.string().max(300).optional(),
-  withdrawnBy: z.string().max(100).optional(),
+  withdrawnBy: z.string()
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in withdrawer name')
+    .optional(),
 
   // Scope and Limitations
   scopeOfConsent: z.array(z.string()).default([]),
@@ -101,7 +110,11 @@ export const individualConsentSchema = z.object({
   // Additional Information
   languageProvided: z.string().max(20).default('English'),
   interpreterUsed: z.boolean().default(false),
-  interpreterName: z.string().max(100).optional(),
+  interpreterName: z.string()
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in interpreter name')
+    .optional(),
 
   notes: z.string().max(500).optional()
 })
@@ -113,7 +126,11 @@ export const individualConsentSchema = z.object({
 export const hipaaAuthorizationSchema = z.object({
   // Basic Authorization Information
   authorizationDate: z.date(),
-  patientName: z.string().min(1).max(100),
+  patientName: z.string()
+    .min(1)
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in patient name'),
   dateOfBirth: z.date(),
 
   // Information to be Disclosed

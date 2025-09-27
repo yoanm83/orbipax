@@ -62,9 +62,6 @@ export type { CheckboxProps, CheckboxGroupProps, CheckboxGroupItemProps, Checkbo
 export { Switch } from "./Switch";
 export type { SwitchProps, SwitchVariants } from "./Switch";
 
-// Toggle component with group support (Toggle.Group, Toggle.GroupItem)
-export { Toggle } from "./Toggle";
-export type { ToggleProps, ToggleGroupProps, ToggleGroupItemProps, ToggleVariants } from "./Toggle";
 
 // Calendar component with year-friendly picker (Calendar.Header, Calendar.Grid, Calendar.MonthPicker, Calendar.YearPicker, Calendar.Range)
 export { Calendar } from "./Calendar";

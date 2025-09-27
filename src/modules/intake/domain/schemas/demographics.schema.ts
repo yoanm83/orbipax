@@ -7,6 +7,8 @@
  */
 
 import { z } from 'zod'
+import { validatePhoneNumber } from '@/shared/utils/phone'
+import { validateName, normalizeName, NAME_LENGTHS } from '@/shared/utils/name'
 import {
   GenderIdentity,
   SexAssignedAtBirth,
@@ -39,7 +41,7 @@ export const addressSchema = z.object({
 
 export const phoneNumberSchema = z.object({
   number: z.string()
-    .regex(/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/, 'Invalid phone number format')
+    .refine(validatePhoneNumber, 'Invalid phone number')
     .transform(val => val.replace(/\D/g, '')),
   type: z.enum(['home', 'mobile', 'work', 'other']),
   isPrimary: z.boolean()
@@ -50,12 +52,16 @@ export const phoneNumberSchema = z.object({
 // =================================================================
 
 export const emergencyContactSchema = z.object({
-  name: z.string().min(1, 'Emergency contact name is required').max(100),
+  name: z.string()
+    .min(1, 'Emergency contact name is required')
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in contact name'),
   relationship: z.string().min(1, 'Relationship is required').max(50),
   phoneNumber: z.string()
-    .regex(/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/, 'Invalid phone number format'),
+    .refine(validatePhoneNumber, 'Invalid phone number'),
   alternatePhone: z.string()
-    .regex(/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/, 'Invalid phone number format')
+    .refine(validatePhoneNumber, 'Invalid phone number')
     .optional(),
   address: addressSchema.optional()
 })
@@ -68,21 +74,25 @@ export const demographicsDataSchema = z.object({
   // Basic Identity
   firstName: z.string()
     .min(1, 'First name is required')
-    .max(50, 'First name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Invalid characters in first name'),
+    .max(NAME_LENGTHS.FIRST_NAME, 'First name too long')
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in first name'),
 
   middleName: z.string()
-    .max(50, 'Middle name too long')
-    .regex(/^[a-zA-Z\s\-'\.]*$/, 'Invalid characters in middle name')
+    .max(NAME_LENGTHS.MIDDLE_NAME, 'Middle name too long')
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in middle name')
     .optional(),
 
   lastName: z.string()
     .min(1, 'Last name is required')
-    .max(50, 'Last name too long')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Invalid characters in last name'),
+    .max(NAME_LENGTHS.LAST_NAME, 'Last name too long')
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in last name'),
 
   preferredName: z.string()
-    .max(50, 'Preferred name too long')
+    .max(NAME_LENGTHS.PREFERRED_NAME, 'Preferred name too long')
+    .transform(normalizeName)
     .optional(),
 
   // Date of Birth with healthcare validation
@@ -144,9 +154,13 @@ export const demographicsDataSchema = z.object({
   // Legal Guardian (for minors)
   hasLegalGuardian: z.boolean(),
   legalGuardianInfo: z.object({
-    name: z.string().min(1).max(100),
+    name: z.string()
+      .min(1, 'Guardian name is required')
+      .max(NAME_LENGTHS.FULL_NAME)
+      .transform(normalizeName)
+      .refine(validateName, 'Invalid characters in guardian name'),
     relationship: z.string().min(1).max(50),
-    phoneNumber: z.string().regex(/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/),
+    phoneNumber: z.string().refine(validatePhoneNumber, 'Invalid phone number'),
     address: addressSchema.optional()
   }).optional()
 })

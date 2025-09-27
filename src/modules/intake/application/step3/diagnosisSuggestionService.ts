@@ -126,7 +126,6 @@ Remember: JSON array only, no additional text.`
       const safeSummary = {
         length: responseContent.length,
         wordCount: responseContent.split(/\s+/).length,
-        sample: responseContent.substring(0, 120).replace(/\n/g, ' '), // Max 120 chars, no newlines
         // Simple hash for tracking without crypto module (avoid Node.js dependency in edge runtime)
         hash: responseContent.split('').reduce((acc, char) => {
           return ((acc << 5) - acc + char.charCodeAt(0)) | 0

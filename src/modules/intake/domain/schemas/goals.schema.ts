@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { validateName, normalizeName, NAME_LENGTHS } from '@/shared/utils/name'
 import {
   PriorityLevel,
   BooleanResponse,
@@ -326,14 +327,20 @@ export const goalsDataSchema = z.object({
     copingStrategies: z.array(z.string().max(200)).default([]),
 
     supportContacts: z.array(z.object({
-      name: z.string().max(100),
+      name: z.string()
+        .max(NAME_LENGTHS.FULL_NAME)
+        .transform(normalizeName)
+        .refine(validateName, 'Invalid characters in contact name'),
       relationship: z.string().max(50),
       phoneNumber: z.string().regex(/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/),
       availableWhen: z.string().max(100).optional()
     })).default([]),
 
     professionalContacts: z.array(z.object({
-      name: z.string().max(100),
+      name: z.string()
+        .max(NAME_LENGTHS.FULL_NAME)
+        .transform(normalizeName)
+        .refine(validateName, 'Invalid characters in professional name'),
       role: z.string().max(50),
       phoneNumber: z.string().regex(/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/),
       afterHoursContact: z.boolean()

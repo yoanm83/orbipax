@@ -1,3 +1,4 @@
+// DEPRECATED: Do not use. Quarantined due to external dep (@radix-ui/react-toggle) not allowed.
 "use client"
 
 import * as React from "react"

@@ -8,6 +8,11 @@ import { useCurrentStep } from '@/modules/intake/state';
 import { IntakeWizardStep1Demographics } from './step1-demographics';
 import { Step2EligibilityInsurance } from './step2-eligibility-insurance';
 import { Step3DiagnosesClinical } from './step3-diagnoses-clinical';
+import { Step4MedicalProviders } from './step4-medical-providers';
+import { Step5Medications } from './step5-medications';
+import { Step6ReferralsServices } from './step6-referrals-services';
+import { Step7LegalConsents } from './step7-legal-consents';
+import { Step8TreatmentGoals } from './step8-treatment-goals';
 
 // Enhanced Wizard Tabs (Stepper Navigation) - Production Ready
 export { EnhancedWizardTabs } from './enhanced-wizard-tabs'
@@ -32,12 +37,22 @@ export function IntakeWizardContent() {
       case 'diagnoses':
         return <Step3DiagnosesClinical />;
 
-      case 'welcome':
       case 'medical-providers':
+        return <Step4MedicalProviders />;
+
       case 'medications':
+        return <Step5Medications />;
+
       case 'referrals':
+        return <Step6ReferralsServices />;
+
       case 'legal-forms':
+        return <Step7LegalConsents />;
+
       case 'goals':
+        return <Step8TreatmentGoals />;
+
+      case 'welcome':
       case 'review':
         // Placeholder for unimplemented steps (no style changes)
         return (

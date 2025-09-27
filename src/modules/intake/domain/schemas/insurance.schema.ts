@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod'
+import { validateName, normalizeName, NAME_LENGTHS } from '@/shared/utils/name'
 import {
   InsuranceType,
   BooleanResponse,
@@ -22,12 +23,20 @@ export const insuranceCoverageSchema = z.object({
   type: z.nativeEnum(InsuranceType),
 
   // Primary Insurance Information
-  carrierName: z.string().min(1, 'Insurance carrier name is required').max(100),
+  carrierName: z.string()
+    .min(1, 'Insurance carrier name is required')
+    .max(NAME_LENGTHS.ORGANIZATION_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in carrier name'),
   policyNumber: z.string().min(1, 'Policy number is required').max(50),
   groupNumber: z.string().max(50).optional(),
 
   // Subscriber Information
-  subscriberName: z.string().min(1, 'Subscriber name is required').max(100),
+  subscriberName: z.string()
+    .min(1, 'Subscriber name is required')
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in subscriber name'),
   subscriberDateOfBirth: z.date(),
   subscriberRelationship: z.enum(['self', 'spouse', 'parent', 'child', 'other']),
   subscriberSSN: z.string()
@@ -164,7 +173,11 @@ export const insuranceEligibilityDataSchema = z.object({
 
   // Eligibility Determination
   eligibilityStatus: z.enum(['eligible', 'pending', 'ineligible', 'conditional']).optional(),
-  eligibilityDeterminedBy: z.string().max(100).optional(),
+  eligibilityDeterminedBy: z.string()
+    .max(NAME_LENGTHS.FULL_NAME)
+    .transform(normalizeName)
+    .refine(validateName, 'Invalid characters in determiner name')
+    .optional(),
   eligibilityDeterminedDate: z.date().optional(),
   eligibilityNotes: z.string().max(1000).optional(),
 
