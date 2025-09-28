@@ -130,6 +130,18 @@ export enum VeteranStatus {
   UNKNOWN = 'unknown'
 }
 
+/**
+ * Housing status for CMH services
+ */
+export enum HousingStatus {
+  HOMELESS = 'homeless',
+  SUPPORTED = 'supported',
+  INDEPENDENT = 'independent',
+  FAMILY = 'family',
+  GROUP = 'group',
+  OTHER = 'other'
+}
+
 // =================================================================
 // CLINICAL ENUMS
 // =================================================================

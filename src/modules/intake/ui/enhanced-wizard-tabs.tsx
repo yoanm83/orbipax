@@ -2,6 +2,7 @@
 
 import { CheckIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { WIZARD_STEPS } from "./enhanced-wizard-tabs/steps.config"
 
 // Utility function for class names
 function cn(...classes: (string | undefined | false)[]): string {
@@ -33,70 +34,15 @@ export function EnhancedWizardTabs({
   const [announcement, setAnnouncement] = useState("")
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
   const prevStepRef = useRef(currentStep)
-  const steps: WizardStep[] = [
-    {
-      id: "welcome",
-      title: "Welcome",
-      shortTitle: "Welcome",
-      status: "completed",
-    },
-    {
-      id: "demographics",
-      title: "Demographics",
-      shortTitle: "Demographics",
-      status: "current",
-    },
-    {
-      id: "insurance",
-      title: "Insurance & Eligibility",
-      shortTitle: "Insurance",
-      status: "pending",
-    },
-    {
-      id: "diagnoses",
-      title: "Clinical Information",
-      shortTitle: "Clinical",
-      status: "pending",
-    },
-    {
-      id: "medical-providers",
-      title: "Medical Providers",
-      shortTitle: "Providers",
-      status: "pending",
-      isOptional: true,
-    },
-    {
-      id: "medications",
-      title: "Medications",
-      shortTitle: "Meds",
-      status: "pending",
-    },
-    {
-      id: "referrals",
-      title: "Referrals",
-      shortTitle: "Referrals",
-      status: "pending",
-      isOptional: true,
-    },
-    {
-      id: "legal-forms",
-      title: "Legal Forms",
-      shortTitle: "Legal",
-      status: "pending",
-    },
-    {
-      id: "goals",
-      title: "Treatment Goals",
-      shortTitle: "Goals",
-      status: "pending",
-    },
-    {
-      id: "review",
-      title: "Review & Submit",
-      shortTitle: "Review",
-      status: "pending",
-    },
-  ]
+
+  // Build steps from centralized configuration
+  const steps: WizardStep[] = WIZARD_STEPS.map(stepConfig => ({
+    id: stepConfig.id,
+    title: stepConfig.title,
+    shortTitle: stepConfig.shortTitle,
+    status: "pending" as const, // Will be updated below
+    ...(stepConfig.isOptional && { isOptional: true })
+  }))
 
   const updatedSteps = steps.map((step, index) => {
     const currentIndex = steps.findIndex((s) => s.id === currentStep)

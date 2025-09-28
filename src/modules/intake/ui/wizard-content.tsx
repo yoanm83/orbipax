@@ -5,14 +5,16 @@
 
 import { useCurrentStep } from '@/modules/intake/state';
 
+import { WelcomeStep } from './step0-welcome';
 import { IntakeWizardStep1Demographics } from './step1-demographics';
 import { Step2EligibilityInsurance } from './step2-eligibility-insurance';
 import { Step3DiagnosesClinical } from './step3-diagnoses-clinical';
 import { Step4MedicalProviders } from './step4-medical-providers';
 import { Step5Medications } from './step5-medications';
 import { Step6ReferralsServices } from './step6-referrals-services';
-import { Step7LegalConsents } from './step7-legal-consents';
+import { Step7LegalConsents } from './step9-legal-consents';
 import { Step8TreatmentGoals } from './step8-treatment-goals';
+import { Step10Review } from './step10-review';
 
 // Enhanced Wizard Tabs (Stepper Navigation) - Production Ready
 export { EnhancedWizardTabs } from './enhanced-wizard-tabs'
@@ -52,21 +54,11 @@ export function IntakeWizardContent() {
       case 'goals':
         return <Step8TreatmentGoals />;
 
-      case 'welcome':
       case 'review':
-        // Placeholder for unimplemented steps (no style changes)
-        return (
-          <div className="flex items-center justify-center h-96 text-muted-foreground">
-            <div className="text-center">
-              <p className="text-lg font-medium">Step: {currentStep}</p>
-              <p className="text-sm mt-2">Enhanced Wizard Tabs navigation functional</p>
-              <div className="mt-4 px-4 py-2 bg-bg border border-border rounded-lg">
-                <p className="text-xs text-muted-foreground">✅ Enhanced Wizard Tabs: Hardened & Production Ready</p>
-                <p className="text-xs text-muted-foreground">⏳ Step Components: Ready for OrbiPax implementation</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <Step10Review />;
+
+      case 'welcome':
+        return <WelcomeStep />;
 
       default:
         return null;

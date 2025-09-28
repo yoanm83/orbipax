@@ -83,7 +83,7 @@ export {
   type Address as DemographicsAddress,
   type PhoneNumber as DemographicsPhoneNumber,
   type EmergencyContact as DemographicsEmergencyContact
-} from './schemas/demographics.schema'
+} from './schemas/demographics/demographics.schema'
 
 // =================================================================
 // INSURANCE & ELIGIBILITY SCHEMA EXPORTS

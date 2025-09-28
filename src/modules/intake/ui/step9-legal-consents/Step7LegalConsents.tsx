@@ -5,7 +5,7 @@ import { AlertTriangle, Check, ChevronDown, ChevronUp, Eye, FileText } from "luc
 import { useState } from "react"
 import { useForm } from 'react-hook-form'
 
-import { legalConsentsSchema, type LegalConsents } from "@/modules/intake/domain/schemas/step7-legal-consents/legalConsents.schema"
+import { legalConsentsSchema, type LegalConsents } from "@/modules/intake/domain/schemas/step9-legal-consents/legalConsents.schema"
 import { Alert, AlertDescription } from "@/shared/ui/primitives/Alert"
 import { Badge } from "@/shared/ui/primitives/Badge"
 import { Button } from "@/shared/ui/primitives/Button"

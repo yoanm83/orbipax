@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { WIZARD_STEPS } from "../../ui/enhanced-wizard-tabs/steps.config";
 import type { WizardStep, TransitionState, WizardFlags, StepCompletion, WizardPreferences } from "../types";
 
 /**
@@ -38,19 +39,8 @@ interface WizardProgressActions {
 
 type WizardProgressStore = WizardProgressState & WizardProgressActions;
 
-/** Step order for navigation logic */
-const STEP_ORDER: WizardStep[] = [
-  'welcome',
-  'demographics',
-  'insurance',
-  'diagnoses',
-  'medical-providers',
-  'medications',
-  'referrals',
-  'legal-forms',
-  'goals',
-  'review'
-];
+/** Step order for navigation logic - derived from centralized config */
+const STEP_ORDER: WizardStep[] = WIZARD_STEPS.map(step => step.id as WizardStep);
 
 /** Initial state - UI-only defaults */
 const initialState: WizardProgressState = {

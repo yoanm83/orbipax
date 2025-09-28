@@ -18,7 +18,7 @@ import {
 } from '../types/common'
 
 // Import all step schemas for validation
-import { demographicsSubmissionSchema } from './demographics.schema'
+import { demographicsSubmissionSchema } from './demographics/demographics.schema'
 import { insuranceSubmissionSchema } from './insurance.schema'
 import { clinicalHistorySubmissionSchema } from './clinical-history.schema'
 import { medicationsSubmissionSchema } from './medications.schema'

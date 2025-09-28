@@ -18,9 +18,10 @@ import {
   Language,
   CommunicationMethod,
   VeteranStatus,
+  HousingStatus,
   type OrganizationId,
   type PatientId
-} from '../types/common'
+} from '../../types/common'
 
 // =================================================================
 // ADDRESS SCHEMA
@@ -138,6 +139,7 @@ export const demographicsDataSchema = z.object({
   address: addressSchema,
   sameAsMailingAddress: z.boolean(),
   mailingAddress: addressSchema.optional(),
+  housingStatus: z.nativeEnum(HousingStatus),
 
   // Emergency Contact
   emergencyContact: emergencyContactSchema,
@@ -159,11 +161,43 @@ export const demographicsDataSchema = z.object({
       .max(NAME_LENGTHS.FULL_NAME)
       .transform(normalizeName)
       .refine(validateName, 'Invalid characters in guardian name'),
-    relationship: z.string().min(1).max(50),
+    relationship: z.enum(['parent', 'legal_guardian', 'grandparent', 'other'])
+      .describe('Guardian relationship to patient'),
     phoneNumber: z.string().refine(validatePhoneNumber, 'Invalid phone number'),
+    email: z.string()
+      .email('Invalid email format')
+      .max(100, 'Email too long')
+      .optional(),
     address: addressSchema.optional()
+  }).optional(),
+
+  // Power of Attorney
+  hasPowerOfAttorney: z.boolean().default(false),
+  powerOfAttorneyInfo: z.object({
+    name: z.string()
+      .min(1, 'POA name is required')
+      .max(NAME_LENGTHS.FULL_NAME)
+      .transform(normalizeName)
+      .refine(validateName, 'Invalid characters in POA name'),
+    phoneNumber: z.string().refine(validatePhoneNumber, 'Invalid phone number')
   }).optional()
-})
+}).refine(
+  (data) => {
+    // If hasPowerOfAttorney is true, powerOfAttorneyInfo must be provided
+    if (data.hasPowerOfAttorney && !data.powerOfAttorneyInfo) {
+      return false
+    }
+    // If hasLegalGuardian is true, legalGuardianInfo must be provided
+    if (data.hasLegalGuardian && !data.legalGuardianInfo) {
+      return false
+    }
+    return true
+  },
+  {
+    message: 'Guardian or POA information is required when enabled',
+    path: ['legalGuardianInfo']
+  }
+)
 
 // =================================================================
 // MULTITENANT DEMOGRAPHICS SCHEMA
