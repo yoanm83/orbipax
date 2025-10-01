@@ -5,7 +5,8 @@ import { getServiceClient } from "./supabase.server";
 
 export async function resolveUserAndOrg(): Promise<{ userId: string; organizationId: string }> {
   // DEV bridge: try header cookie "opx_uid" if no auth context (local only)
-  const devUid = cookies().get("opx_uid")?.value;
+  const jar = await cookies();
+  const devUid = jar.get("opx_uid")?.value;
   const userId = devUid ?? ""; // empty means: we will fallback to single-org logic
 
   const sb = getServiceClient();

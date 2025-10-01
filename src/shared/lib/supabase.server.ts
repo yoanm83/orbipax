@@ -3,6 +3,8 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database } from "@/shared/db";
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE!; // NEVER expose to client
 
@@ -10,5 +12,5 @@ export function getServiceClient() {
   if (!url || !serviceKey) {
     throw new Error("Supabase URL/Service key missing in server env.");
   }
-  return createClient(url, serviceKey, { auth: { persistSession: false } });
+  return createClient<Database>(url, serviceKey, { auth: { persistSession: false } });
 }

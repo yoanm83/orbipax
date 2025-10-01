@@ -5,6 +5,7 @@
  */
 
 import { cookies } from 'next/headers'
+
 import { createServerClient } from '@/shared/lib/supabase.client'
 import { auditLog } from '@/shared/utils/telemetry/audit-log'
 
@@ -51,7 +52,7 @@ export function withAuth<T extends (...args: any[]) => Promise<any>>(
               .maybeSingle()
 
             if (!orgError && org?.id) {
-              organizationId = org.id as string
+              organizationId = org.id
             }
           }
 
@@ -68,7 +69,7 @@ export function withAuth<T extends (...args: any[]) => Promise<any>>(
 
             if (!anyOrgError && anyOrg?.id) {
               // Assign user to first available org (temporary solution)
-              organizationId = anyOrg.id as string
+              organizationId = anyOrg.id
 
               // Optional: Update user profile with this org for next time
               await sb
@@ -110,7 +111,7 @@ export function withAuth<T extends (...args: any[]) => Promise<any>>(
               .maybeSingle()
 
             if (!error && data?.organization_id) {
-              organizationId = data.organization_id as string
+              organizationId = data.organization_id
             }
           } catch {
             // User profile lookup failed, continue to fallbacks
@@ -119,18 +120,18 @@ export function withAuth<T extends (...args: any[]) => Promise<any>>(
           // If no organization from user profile, try dev fallbacks
           if (!organizationId) {
             // Check for dev organization ID in environment
-            if (process.env.OPX_DEV_ORG_ID) {
+            if (process.env['OPX_DEV_ORG_ID']) {
               // Verify the env org exists in DB
               try {
                 const sb = await createServerClient()
                 const { data: org } = await sb
                   .schema('orbipax_core').from('organizations')
                   .select('id')
-                  .eq('id', process.env.OPX_DEV_ORG_ID)
+                  .eq('id', process.env['OPX_DEV_ORG_ID'])
                   .maybeSingle()
 
                 if (org?.id) {
-                  organizationId = org.id as string
+                  organizationId = org.id
                 }
               } catch {
                 // Env org doesn't exist, continue to next fallback
@@ -148,7 +149,7 @@ export function withAuth<T extends (...args: any[]) => Promise<any>>(
                   .maybeSingle()
 
                 if (org?.id) {
-                  organizationId = org.id as string
+                  organizationId = org.id
                 }
               } catch {
                 // No organizations in database

@@ -1,0 +1,342 @@
+name: 🛡️ Intake Step2 Gate - Insurance Module CI
+
+on:
+  pull_request:
+    branches: [main, develop, release/*]
+    paths:
+      - 'src/modules/intake/**'
+      - 'tests/modules/intake/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/intake-step2-gate.yml'
+
+jobs:
+  contracts-tests-step2:
+    name: 📋 Contract Tests (Step2)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Application Layer Tests
+        run: npm test -- tests/modules/intake/application/step2/ --run
+
+      - name: Run Actions Layer Tests
+        run: npm test -- tests/modules/intake/actions/step2/ --run
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-results-step2
+          path: coverage/
+          retention-days: 7
+
+  typecheck:
+    name: 🔍 TypeScript Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Intake module types
+        run: |
+          echo "🔍 Checking TypeScript types for Intake module..."
+          npm run typecheck 2>&1 | tee typecheck-output.log
+
+          # Filter for Intake-specific errors (excluding legacy/archive)
+          grep -E "src/modules/intake" typecheck-output.log | grep -v "legacy\|archive" > intake-errors.log || true
+
+          # Check if there are any critical errors
+          if grep -E "error TS" intake-errors.log; then
+            echo "❌ TypeScript errors found in Intake module"
+            cat intake-errors.log
+            exit 1
+          else
+            echo "✅ TypeScript check passed for Intake module"
+          fi
+
+  eslint:
+    name: 📝 ESLint Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint Intake module
+        run: |
+          echo "📝 Running ESLint on Intake module..."
+          npm run lint -- src/modules/intake tests/modules/intake 2>&1 | tee eslint-output.log
+
+          # Check for errors (not warnings)
+          if grep -E "error" eslint-output.log | grep -v "0 errors"; then
+            echo "❌ ESLint errors found in Intake module"
+            exit 1
+          else
+            echo "✅ ESLint check passed for Intake module"
+          fi
+
+  sentinel:
+    name: 🏥 Sentinel Checks (SoC/PHI/A11y)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check SoC compliance
+        run: |
+          echo "🏗️ Checking Separation of Concerns..."
+
+          # Check Application doesn't import Infrastructure
+          if grep -r "from.*infrastructure\|from.*@/infrastructure" src/modules/intake/application/ --include="*.ts" --include="*.tsx"; then
+            echo "❌ SoC violation: Application importing Infrastructure"
+            exit 1
+          fi
+
+          # Check Domain doesn't import from other layers
+          if grep -r "from.*application\|from.*infrastructure\|from.*ui" src/modules/intake/domain/ --include="*.ts" --include="*.tsx"; then
+            echo "❌ SoC violation: Domain importing from other layers"
+            exit 1
+          fi
+
+          # Check Actions use factory pattern for Step2
+          if ! grep -r "createInsuranceRepository" src/modules/intake/actions/step2/ --include="*.ts"; then
+            echo "❌ SoC violation: Actions not using factory pattern for Step2"
+            exit 1
+          fi
+
+          echo "✅ SoC compliance check passed"
+
+      - name: Check PHI protection
+        run: |
+          echo "🔒 Checking PHI protection in State/UI..."
+
+          # Check for PHI fields in state - Step2 specific
+          PHI_PATTERNS="memberId\|groupNumber\|subscriberName\|medicaidId\|medicareId"
+
+          if grep -r "$PHI_PATTERNS" src/modules/intake/state/slices/step2-ui.slice.ts --include="*.ts" | grep -v "// NO PHI"; then
+            echo "❌ PHI violation: Patient data found in state management"
+            exit 1
+          fi
+
+          # Check for error.message exposure in UI
+          if grep -r "error\.message" src/modules/intake/ui/step2-insurance/ --include="*.tsx" | grep -v "ERROR_MESSAGES"; then
+            echo "❌ PHI violation: error.message exposed directly in UI"
+            exit 1
+          fi
+
+          echo "✅ PHI protection check passed"
+
+      - name: Check multi-tenant reset
+        run: |
+          echo "🏢 Checking multi-tenant reset implementation..."
+
+          # Check for resetStep2Ui in state slice
+          if ! grep -r "resetStep2Ui" src/modules/intake/state/slices/step2-ui.slice.ts; then
+            echo "❌ Multi-tenant violation: Missing reset functionality in Step2"
+            exit 1
+          fi
+
+          # Check for organizationId in repository
+          if ! grep -r "organization_id\|organizationId" src/modules/intake/infrastructure/repositories/insurance.repository.ts; then
+            echo "❌ Multi-tenant violation: Missing organization isolation in repository"
+            exit 1
+          fi
+
+          echo "✅ Multi-tenant reset check passed"
+
+      - name: Check accessibility
+        run: |
+          echo "♿ Checking accessibility compliance..."
+
+          # Check for ARIA attributes in UI components
+          if ! grep -r "role=\"alert\"\|aria-live\|aria-invalid\|aria-describedby" src/modules/intake/ui/step2-insurance/ --include="*.tsx"; then
+            echo "⚠️ Warning: Missing ARIA attributes in Step2 UI"
+          fi
+
+          # Check for inline errors (not toasts)
+          if grep -r "toast\.\|Toast" src/modules/intake/ui/step2-insurance/ --include="*.tsx"; then
+            echo "❌ A11y violation: Using toast notifications instead of inline errors"
+            exit 1
+          fi
+
+          # Check for unique error IDs with aria-describedby
+          if ! grep -r "aria-describedby=.*error" src/modules/intake/ui/step2-insurance/ --include="*.tsx"; then
+            echo "❌ A11y violation: Missing aria-describedby for error messages"
+            exit 1
+          fi
+
+          echo "✅ Accessibility check passed"
+
+      - name: Check AUDIT documentation
+        run: |
+          echo "📄 Checking AUDIT documentation..."
+
+          # Check for audit reports in tmp/
+          if ls tmp/*step2*.md 2>/dev/null; then
+            echo "✅ AUDIT documentation found"
+            ls -la tmp/*step2*.md
+          else
+            echo "⚠️ Warning: No AUDIT documentation found in tmp/"
+          fi
+
+  no-console:
+    name: 🚫 No Console Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for console statements
+        run: |
+          echo "🚫 Checking for console statements in production code..."
+
+          # Search for console.* in src/ excluding tests and README
+          CONSOLE_FOUND=false
+
+          while IFS= read -r file; do
+            if [[ ! "$file" =~ \.test\.|\.spec\.|README|\.md$ ]]; then
+              if grep -l "console\.\(log\|warn\|error\|debug\|info\)" "$file" 2>/dev/null; then
+                echo "❌ Console statement found in: $file"
+                grep -n "console\." "$file"
+                CONSOLE_FOUND=true
+              fi
+            fi
+          done < <(find src/modules/intake -type f \( -name "*.ts" -o -name "*.tsx" \) 2>/dev/null)
+
+          if [ "$CONSOLE_FOUND" = true ]; then
+            echo "❌ Console statements found in production code"
+            exit 1
+          else
+            echo "✅ No console statements in production code"
+          fi
+
+  gate-summary:
+    name: 📊 Gate Summary
+    runs-on: ubuntu-latest
+    needs: [contracts-tests-step2, typecheck, eslint, sentinel, no-console]
+    if: always()
+
+    steps:
+      - name: Gate Status Report
+        run: |
+          echo "🛡️ Intake Step2 Gate Summary"
+          echo "============================"
+          echo ""
+          echo "Contract Tests: ${{ needs.contracts-tests-step2.result }}"
+          echo "TypeCheck: ${{ needs.typecheck.result }}"
+          echo "ESLint: ${{ needs.eslint.result }}"
+          echo "Sentinel: ${{ needs.sentinel.result }}"
+          echo "No-Console: ${{ needs.no-console.result }}"
+          echo ""
+
+          # Determine overall status
+          if [ "${{ needs.contracts-tests-step2.result }}" == "success" ] && \
+             [ "${{ needs.typecheck.result }}" == "success" ] && \
+             [ "${{ needs.eslint.result }}" == "success" ] && \
+             [ "${{ needs.sentinel.result }}" == "success" ] && \
+             [ "${{ needs.no-console.result }}" == "success" ]; then
+            echo "✅ All checks passed - PR can be merged"
+            echo ""
+            echo "Compliance Summary:"
+            echo "  ✅ Contract tests passing"
+            echo "  ✅ TypeScript types valid"
+            echo "  ✅ ESLint rules satisfied"
+            echo "  ✅ SoC/PHI/A11y compliant"
+            echo "  ✅ No console statements"
+          else
+            echo "❌ Some checks failed - PR blocked"
+            echo ""
+            echo "Fix the following before merge:"
+            [ "${{ needs.contracts-tests-step2.result }}" != "success" ] && echo "  ❌ Contract tests"
+            [ "${{ needs.typecheck.result }}" != "success" ] && echo "  ❌ TypeScript errors"
+            [ "${{ needs.eslint.result }}" != "success" ] && echo "  ❌ ESLint violations"
+            [ "${{ needs.sentinel.result }}" != "success" ] && echo "  ❌ Sentinel checks"
+            [ "${{ needs.no-console.result }}" != "success" ] && echo "  ❌ Console statements"
+            exit 1
+          fi
+
+      - name: Comment PR Status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const contracts = '${{ needs.contracts-tests-step2.result }}';
+            const typecheck = '${{ needs.typecheck.result }}';
+            const eslint = '${{ needs.eslint.result }}';
+            const sentinel = '${{ needs.sentinel.result }}';
+            const noconsole = '${{ needs.no-console.result }}';
+
+            const allPassed = contracts === 'success' &&
+                            typecheck === 'success' &&
+                            eslint === 'success' &&
+                            sentinel === 'success' &&
+                            noconsole === 'success';
+
+            const comment = `## 🛡️ Intake Step2 Gate Results
+
+            ${allPassed ? '✅ **PASSED**' : '❌ **FAILED**'} - Insurance Module CI Gate
+
+            | Check | Status | Description |
+            |-------|--------|-------------|
+            | Contract Tests | ${contracts === 'success' ? '✅' : '❌'} | Application & Actions layer tests |
+            | TypeCheck | ${typecheck === 'success' ? '✅' : '❌'} | TypeScript type validation |
+            | ESLint | ${eslint === 'success' ? '✅' : '❌'} | Code quality & style |
+            | Sentinel | ${sentinel === 'success' ? '✅' : '❌'} | SoC, PHI, Multi-tenant, A11y |
+            | No-Console | ${noconsole === 'success' ? '✅' : '❌'} | No console in production |
+
+            ${allPassed
+              ? '🎉 All checks passed! This PR is ready for review.'
+              : '🚫 Please fix the failing checks before this PR can be merged.'}
+
+            ---
+            *Required for merge: All checks must pass*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

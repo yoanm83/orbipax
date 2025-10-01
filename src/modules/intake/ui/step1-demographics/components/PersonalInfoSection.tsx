@@ -9,13 +9,13 @@ import { Input } from "@/shared/ui/primitives/Input"
 import { Label } from "@/shared/ui/primitives/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/shared/ui/primitives/Form"
-import type { DemographicsData } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
+import type { Demographics } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
 
 interface PersonalInfoSectionProps {
   onSectionToggle: () => void
   isExpanded: boolean
   onDOBChange?: (date: Date | null) => void
-  form: UseFormReturn<Partial<DemographicsData>>
+  form: UseFormReturn<Partial<Demographics>>
 }
 
 export function PersonalInfoSection({ onSectionToggle, isExpanded, onDOBChange, form }: PersonalInfoSectionProps) {
@@ -199,7 +199,7 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded, onDOBChange, 
             {/* Field 4: Gender */}
             <FormField
               control={form.control}
-              name="genderIdentity"
+              name="gender"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Gender *</FormLabel>
@@ -209,8 +209,8 @@ export function PersonalInfoSection({ onSectionToggle, isExpanded, onDOBChange, 
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
-                        aria-invalid={!!form.formState.errors.genderIdentity}
-                        aria-describedby={form.formState.errors.genderIdentity ? "gender-error" : undefined}
+                        aria-invalid={!!form.formState.errors.gender}
+                        aria-describedby={form.formState.errors.gender ? "gender-error" : undefined}
                       >
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>

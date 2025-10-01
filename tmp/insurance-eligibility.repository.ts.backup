@@ -1,0 +1,274 @@
+/**
+ * Insurance & Eligibility Repository Implementation - Infrastructure Layer
+ * OrbiPax Community Mental Health System
+ *
+ * Real Supabase implementation using RPC and snapshot views
+ * - WRITE: upsert_insurance_with_primary_swap RPC function
+ * - READ: v_patient_insurance_eligibility_snapshot view
+ *
+ * SoC: Persistence adapter only - NO validation, NO business logic
+ */
+
+import "server-only"
+import { getServiceClient } from '@/shared/lib/supabase.server'
+import type {
+  InsuranceEligibilityRepository,
+  RepositoryResponse,
+  InsuranceEligibilityInputDTO,
+  InsuranceEligibilityOutputDTO,
+  InsuranceCoverageDTO
+} from '@/modules/intake/application/step2'
+
+/**
+ * Error codes for repository operations
+ */
+const REPO_ERROR_CODES = {
+  NOT_IMPLEMENTED: 'NOT_IMPLEMENTED',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  UNIQUE_VIOLATION_PRIMARY: 'UNIQUE_VIOLATION_PRIMARY',
+  CHECK_VIOLATION: 'CHECK_VIOLATION',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+/**
+ * Maps InsuranceCoverageDTO to JSONB payload for RPC function
+ * Converts camelCase DTO fields to snake_case DB columns
+ *
+ * @param dto - Application layer DTO
+ * @returns JSONB record for Postgres RPC
+ */
+function mapCoverageDTOToJSONB(dto: InsuranceCoverageDTO): Record<string, any> {
+  return {
+    // Identity
+    member_id: dto.policyNumber,
+    subscriber_name: dto.subscriberName ?? null,
+    subscriber_ssn: dto.subscriberSSN ?? null,
+    subscriber_dob: dto.subscriberDateOfBirth ?? null,
+
+    // Plan Details
+    plan_kind: dto.planKind ?? null,
+    plan_name: dto.planName ?? null,
+
+    // Payer
+    payer_name: dto.payerName ?? null,
+    payer_id: dto.payerId ?? null,
+    group_number: dto.groupNumber ?? null,
+
+    // Coverage
+    is_primary: dto.isPrimary ?? false,
+    effective_date: dto.effectiveDate ?? null,
+    termination_date: dto.terminationDate ?? null,
+
+    // Copay/Coinsurance
+    copay_amount: dto.copayAmount ?? null,
+    coinsurance_percentage: dto.coinsurancePercentage ?? null,
+    deductible_amount: dto.deductibleAmount ?? null,
+    out_of_pocket_max: dto.outOfPocketMax ?? null
+  }
+}
+
+/**
+ * Maps Postgres error to generic RepositoryResponse
+ * SECURITY: Never expose PII (SSN, DOB, names) or internal DB details
+ *
+ * @param error - Postgres error object
+ * @returns Generic error response
+ */
+function mapPostgresError(error: any): RepositoryResponse<never> {
+  // Unique violation (is_primary constraint)
+  if (error.code === '23505') {
+    return {
+      ok: false,
+      error: {
+        code: REPO_ERROR_CODES.UNIQUE_VIOLATION_PRIMARY,
+        message: 'Another primary insurance exists for this patient'
+      }
+    }
+  }
+
+  // Check constraint violation (e.g., copay_amount >= 0)
+  if (error.code === '23514') {
+    return {
+      ok: false,
+      error: {
+        code: REPO_ERROR_CODES.CHECK_VIOLATION,
+        message: 'Invalid amount: values must be non-negative'
+      }
+    }
+  }
+
+  // RLS policy violation
+  if (error.code === '42501') {
+    return {
+      ok: false,
+      error: {
+        code: REPO_ERROR_CODES.UNAUTHORIZED,
+        message: 'Access denied'
+      }
+    }
+  }
+
+  // Generic error (do not expose internal details)
+  return {
+    ok: false,
+    error: {
+      code: REPO_ERROR_CODES.UNKNOWN,
+      message: 'Could not save insurance record'
+    }
+  }
+}
+
+/**
+ * Insurance & Eligibility Repository Implementation
+ *
+ * Implements the InsuranceEligibilityRepository port with real Supabase persistence
+ * Uses RLS for multi-tenant data isolation - all queries filtered by organization_id
+ */
+export class InsuranceEligibilityRepositoryImpl implements InsuranceEligibilityRepository {
+
+  /**
+   * Save single insurance coverage record using RPC
+   * Uses upsert_insurance_with_primary_swap for atomic is_primary handling
+   *
+   * @param patientId - Patient UUID
+   * @param dto - Insurance coverage DTO
+   * @returns Repository response with record ID or error
+   */
+  async saveCoverage(
+    patientId: string,
+    dto: InsuranceCoverageDTO
+  ): Promise<RepositoryResponse<{ id: string }>> {
+    try {
+      const client = getServiceClient()
+      const jsonbPayload = mapCoverageDTOToJSONB(dto)
+
+      const { data, error } = await client.rpc('upsert_insurance_with_primary_swap', {
+        p_patient_id: patientId,
+        p_record: jsonbPayload
+      })
+
+      if (error) {
+        return mapPostgresError(error)
+      }
+
+      if (!data) {
+        return {
+          ok: false,
+          error: {
+            code: REPO_ERROR_CODES.UNKNOWN,
+            message: 'RPC returned no data'
+          }
+        }
+      }
+
+      return {
+        ok: true,
+        data: { id: data }
+      }
+    } catch (error) {
+      return mapPostgresError(error)
+    }
+  }
+
+  /**
+   * Get insurance & eligibility snapshot by patient ID
+   * Reads from v_patient_insurance_eligibility_snapshot view (RLS enforced)
+   *
+   * @param patientId - Patient UUID
+   * @returns Repository response with snapshot or error
+   */
+  async getSnapshot(
+    patientId: string
+  ): Promise<RepositoryResponse<InsuranceEligibilityOutputDTO>> {
+    try {
+      const client = getServiceClient()
+
+      const { data, error } = await client
+        .from('v_patient_insurance_eligibility_snapshot')
+        .select('*')
+        .eq('patient_id', patientId)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return {
+            ok: false,
+            error: {
+              code: REPO_ERROR_CODES.NOT_FOUND,
+              message: 'No insurance records found'
+            }
+          }
+        }
+        return mapPostgresError(error)
+      }
+
+      // TODO: Map snapshot view columns to InsuranceEligibilityOutputDTO
+      // This requires defining the view structure and mapper
+      return {
+        ok: false,
+        error: {
+          code: REPO_ERROR_CODES.NOT_IMPLEMENTED,
+          message: 'Snapshot mapper not yet implemented'
+        }
+      }
+    } catch (error) {
+      return mapPostgresError(error)
+    }
+  }
+
+  /**
+   * Find insurance & eligibility data by session
+   * Delegates to getSnapshot using patient_id from session
+   *
+   * @param sessionId - Intake session identifier
+   * @param organizationId - Organization context for multi-tenant isolation
+   * @returns Repository response with snapshot or error
+   */
+  async findBySession(
+    sessionId: string,
+    organizationId: string
+  ): Promise<RepositoryResponse<InsuranceEligibilityOutputDTO>> {
+    // TODO: Query intake_sessions table to get patient_id from session_id
+    // Then call getSnapshot(patientId)
+    return {
+      ok: false,
+      error: {
+        code: REPO_ERROR_CODES.NOT_IMPLEMENTED,
+        message: 'Session lookup not yet implemented'
+      }
+    }
+  }
+
+  /**
+   * Save insurance & eligibility data for a session
+   * Delegates to saveCoverage for each insurance record
+   *
+   * @param sessionId - Intake session identifier
+   * @param organizationId - Organization context for multi-tenant isolation
+   * @param input - Insurance & eligibility data to save
+   * @returns Repository response with session ID or error
+   */
+  async save(
+    sessionId: string,
+    organizationId: string,
+    input: InsuranceEligibilityInputDTO
+  ): Promise<RepositoryResponse<{ sessionId: string }>> {
+    // TODO: Get patient_id from session, then call saveCoverage for each coverage
+    // Must handle transactional rollback if any coverage fails
+    return {
+      ok: false,
+      error: {
+        code: REPO_ERROR_CODES.NOT_IMPLEMENTED,
+        message: 'Batch save not yet implemented'
+      }
+    }
+  }
+}
+
+/**
+ * Export singleton instance
+ * This will be replaced with proper instantiation via factory
+ */
+export const insuranceEligibilityRepository = new InsuranceEligibilityRepositoryImpl()

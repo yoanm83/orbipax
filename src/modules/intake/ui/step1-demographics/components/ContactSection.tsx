@@ -11,12 +11,12 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/shar
 import { Input } from "@/shared/ui/primitives/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
 
-import type { DemographicsData } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
+import type { Demographics } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
 
 interface ContactSectionProps {
   onSectionToggle: () => void
   isExpanded: boolean
-  form: UseFormReturn<Partial<DemographicsData>>
+  form: UseFormReturn<Partial<Demographics>>
 }
 
 export function ContactSection({ onSectionToggle, isExpanded, form }: ContactSectionProps) {

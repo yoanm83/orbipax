@@ -1,0 +1,155 @@
+'use client'
+
+import { useCallback } from "react"
+
+import { Button } from "@/shared/ui/primitives/Button"
+import { validateMedicalProviders } from "@/modules/intake/domain/schemas/medical-providers"
+import { useStep4Store, step4Selectors } from "@/modules/intake/state/slices/step4.slice"
+
+import { ProvidersSection } from "./components/ProvidersSection"
+import { PsychiatristEvaluatorSection } from "./components/PsychiatristEvaluatorSection"
+
+/**
+ * Step 4: Medical Providers
+ * Container for medical provider information sections with unified validation
+ * SoC: UI layer only - orchestrates sections and handles submit
+ * Now uses canonical Step 4 store (no legacy stores)
+ */
+interface Step4MedicalProvidersProps {
+  onSubmit?: (data: Record<string, unknown>) => void
+  onNext?: () => void
+}
+
+export function Step4MedicalProviders({
+  onSubmit,
+  onNext
+}: Step4MedicalProvidersProps = {}) {
+  // Connect to canonical store
+  const store = useStep4Store()
+  const isSubmitting = useStep4Store(step4Selectors.isSubmitting)
+  const isProvidersExpanded = useStep4Store(step4Selectors.isProvidersExpanded)
+  const isPsychiatristExpanded = useStep4Store(step4Selectors.isPsychiatristExpanded)
+
+  /**
+   * Handle unified submit with validation
+   * Uses canonical store's buildPayload selector
+   */
+  const handleSubmit = useCallback(async () => {
+    store.setIsSubmitting(true)
+    store.clearValidationErrors()
+
+    try {
+      // Build payload from canonical store
+      const payload = step4Selectors.buildPayload(useStep4Store.getState())
+
+      // Validate with composite schema
+      const result = validateMedicalProviders(payload)
+
+      if (!result.ok) {
+        // Map errors to respective sections in canonical store
+        const errorsBySection: Record<string, Record<string, string>> = {
+          providers: {},
+          psychiatrist: {}
+        }
+
+        // Process Zod errors
+        result.issues.forEach(issue => {
+          const path = issue.path
+          if (path.length >= 2) {
+            const section = path[0] as string
+            const field = path[1] as string
+
+            if (section === 'providers' || section === 'psychiatrist') {
+              // Map field-specific error messages
+              let message = issue.message
+
+              // Custom messages for better UX
+              if (field === 'hasPCP' && section === 'providers') {
+                message = 'Please indicate if you have a primary care provider'
+              } else if (field === 'hasBeenEvaluated' && section === 'psychiatrist') {
+                message = 'Please indicate if you have been evaluated by a psychiatrist'
+              }
+
+              errorsBySection[section][field] = message
+            }
+          }
+        })
+
+        // Set errors in canonical store
+        if (Object.keys(errorsBySection['providers']).length > 0) {
+          store.setValidationErrors('providers', errorsBySection['providers'])
+        }
+        if (Object.keys(errorsBySection['psychiatrist']).length > 0) {
+          store.setValidationErrors('psychiatrist', errorsBySection['psychiatrist'])
+        }
+
+        // Expand first section with errors
+        const sectionsWithErrors = Object.keys(errorsBySection).filter(
+          section => Object.keys(errorsBySection[section]).length > 0
+        )
+        if (sectionsWithErrors.length > 0) {
+          const firstSection = sectionsWithErrors[0] as 'providers' | 'psychiatrist'
+          const currentState = useStep4Store.getState()
+          if (!currentState.expandedSections[firstSection]) {
+            store.toggleSection(firstSection)
+          }
+        }
+
+        store.setIsSubmitting(false)
+        return
+      }
+
+      // Clear all validation errors on success
+      store.clearValidationErrors()
+
+      // Call onSubmit callback if provided
+      if (onSubmit) {
+        await onSubmit(payload)
+      }
+
+      // Navigate to next step if callback provided
+      if (onNext) {
+        onNext()
+      }
+    } catch (error) {
+      // Handle unexpected errors gracefully
+      store.setIsSubmitting(false)
+    } finally {
+      store.setIsSubmitting(false)
+    }
+  }, [
+    store,
+    onSubmit,
+    onNext
+  ])
+
+  return (
+    <div className="flex-1 w-full">
+      <div className="p-6 space-y-6">
+        {/* Primary Care Provider Section */}
+        <ProvidersSection
+          isExpanded={isProvidersExpanded}
+          onSectionToggle={() => store.toggleSection("providers")}
+        />
+
+        {/* Psychiatrist / Clinical Evaluator Section */}
+        <PsychiatristEvaluatorSection
+          isExpanded={isPsychiatristExpanded}
+          onSectionToggle={() => store.toggleSection("psychiatrist")}
+        />
+
+
+        {/* Submit Button */}
+        <div className="flex justify-end pt-6 border-t border-[var(--border)]">
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="min-w-[120px]"
+          >
+            {isSubmitting ? 'Validating...' : 'Save & Continue'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,10 +1,12 @@
 'use client'
 
-import { Brain, ChevronUp, ChevronDown } from "lucide-react"
 import { useMemo, useCallback } from "react"
+import { Brain, ChevronUp, ChevronDown } from "lucide-react"
 
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
-import { Label } from "@/shared/ui/primitives/label"
+import { DatePicker } from "@/shared/ui/primitives/DatePicker"
+import { Input } from "@/shared/ui/primitives/Input"
+import { Label } from "@/shared/ui/primitives/Label"
 import {
   Select,
   SelectContent,
@@ -12,15 +14,10 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/shared/ui/primitives/Select"
-import { Input } from "@/shared/ui/primitives/Input"
-import { Textarea } from "@/shared/ui/primitives/Textarea"
 import { Switch } from "@/shared/ui/primitives/Switch"
-import { DatePicker } from "@/shared/ui/primitives/DatePicker"
-
-// Import store
-import { usePsychiatristUIStore } from "@/modules/intake/state/slices/step4"
-// Import validation from schema
-import { validatePsychiatrist } from "@/modules/intake/domain/schemas/step4"
+import { Textarea } from "@/shared/ui/primitives/Textarea"
+import { validatePsychiatrist } from "@/modules/intake/domain/schemas/medical-providers"
+import { useStep4Store, step4Selectors } from "@/modules/intake/state/slices/step4.slice"
 
 interface PsychiatristEvaluatorSectionProps {
   onSectionToggle?: () => void
@@ -46,8 +43,13 @@ export function PsychiatristEvaluatorSection({
   // Generate unique section ID for this instance
   const sectionUid = useMemo(() => `psy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, [])
 
-  // Connect to store
-  const store = usePsychiatristUIStore()
+  // Connect to canonical store
+  const store = useStep4Store()
+  const psychiatrist = useStep4Store(step4Selectors.psychiatrist)
+  const validationErrors = useStep4Store(step4Selectors.psychiatristErrors)
+  const storeIsExpanded = useStep4Store(step4Selectors.isPsychiatristExpanded)
+
+  // Extract psychiatrist fields
   const {
     hasBeenEvaluated,
     psychiatristName,
@@ -56,23 +58,12 @@ export function PsychiatristEvaluatorSection({
     notes,
     differentEvaluator,
     evaluatorName,
-    evaluatorClinic,
-    isExpanded: storeIsExpanded,
-    validationErrors,
-    setHasBeenEvaluated,
-    setPsychiatristField,
-    toggleDifferentEvaluator,
-    setDifferentEvaluator,
-    setEvaluatorField,
-    toggleExpanded,
-    setValidationErrors,
-    clearValidationError,
-    resetConditionalFields
-  } = store
+    evaluatorClinic
+  } = psychiatrist
 
   // Use external isExpanded if provided, otherwise use store
   const isExpanded = externalIsExpanded ?? storeIsExpanded
-  const handleToggle = onSectionToggle ?? toggleExpanded
+  const handleToggle = onSectionToggle ?? (() => store.toggleSection('psychiatrist'))
 
   // Generate payload for submission
   const getPayload = useCallback(() => {
@@ -98,11 +89,11 @@ export function PsychiatristEvaluatorSection({
     const payload = getPayload()
     const result = validatePsychiatrist(payload)
 
-    if (!result.success) {
+    if (!result.ok) {
       const errors: Record<string, string> = {}
 
       // Map Zod errors to field-specific messages
-      result.error.issues.forEach((issue) => {
+      result.issues.forEach((issue) => {
         const field = issue.path[0] as string
 
         if (field === 'hasBeenEvaluated') {
@@ -128,14 +119,14 @@ export function PsychiatristEvaluatorSection({
         }
       })
 
-      setValidationErrors(errors)
+      store.setValidationErrors('psychiatrist', errors)
       return false
     }
 
     // Clear all errors on successful validation
-    setValidationErrors({})
+    store.setValidationErrors('psychiatrist', {})
     return true
-  }, [getPayload, psychiatristName, setValidationErrors])
+  }, [store, getPayload, psychiatristName])
 
   // Expose validation interface via window
   if (typeof window !== 'undefined') {
@@ -182,13 +173,13 @@ export function PsychiatristEvaluatorSection({
               <Select
                 value={hasBeenEvaluated ?? ''}
                 onValueChange={(value) => {
-                  setHasBeenEvaluated(value as 'Yes' | 'No')
+                  store.setPsychiatristField('hasBeenEvaluated', value as 'Yes' | 'No')
                   if (value) {
-                    clearValidationError('hasBeenEvaluated')
+                    store.clearValidationError('psychiatrist', 'hasBeenEvaluated')
                   }
                   // Clear conditional fields when not "Yes"
                   if (value !== 'Yes') {
-                    resetConditionalFields()
+                    store.resetConditionalFields('psychiatrist')
                   }
                 }}
               >
@@ -231,10 +222,10 @@ export function PsychiatristEvaluatorSection({
                       onChange={(e) => {
                         const value = e.target.value
                         if (value.length <= 120) {
-                          setPsychiatristField('psychiatristName', value)
+                          store.setPsychiatristField('psychiatristName', value)
                           // Clear error if valid
                           if (value.trim()) {
-                            clearValidationError('psychiatristName')
+                            store.clearValidationError('psychiatrist', 'psychiatristName')
                           }
                         }
                       }}
@@ -260,18 +251,18 @@ export function PsychiatristEvaluatorSection({
                     </Label>
                     <DatePicker
                       id="psy-date"
-                      date={evaluationDate}
+                      date={evaluationDate ? new Date(evaluationDate) : undefined}
                       onSelect={(date) => {
-                        setPsychiatristField('evaluationDate', date)
+                        store.setPsychiatristField('evaluationDate', date?.toISOString())
                         if (date) {
-                          clearValidationError('evaluationDate')
+                          store.clearValidationError('psychiatrist', 'evaluationDate')
                         }
                       }}
                       placeholder="Select evaluation date"
                       className="w-full"
                       aria-required="true"
                       aria-invalid={!!validationErrors['evaluationDate'] ? "true" : undefined}
-                      {...(validationErrors['evaluationDate'] && { 'aria-describedby': "psy-date-error" })}
+                      {...(validationErrors['evaluationDate'] && { "aria-describedby": "psy-date-error" })}
                     />
                     {validationErrors['evaluationDate'] && (
                       <p id="psy-date-error" className="text-sm text-[var(--destructive)]" role="alert">
@@ -293,8 +284,8 @@ export function PsychiatristEvaluatorSection({
                     onChange={(e) => {
                       const value = e.target.value
                       if (value.length <= 120) {
-                        setPsychiatristField('clinicName', value)
-                        clearValidationError('clinicName')
+                        store.setPsychiatristField('clinicName', value)
+                        store.clearValidationError('psychiatrist', 'clinicName')
                       }
                     }}
                     maxLength={120}
@@ -322,8 +313,8 @@ export function PsychiatristEvaluatorSection({
                     onChange={(e) => {
                       const value = e.target.value
                       if (value.length <= 300) {
-                        setPsychiatristField('notes', value)
-                        clearValidationError('notes')
+                        store.setPsychiatristField('notes', value)
+                        store.clearValidationError('psychiatrist', 'notes')
                       }
                     }}
                     maxLength={300}
@@ -350,13 +341,13 @@ export function PsychiatristEvaluatorSection({
                     id="psy-diff"
                     checked={differentEvaluator ?? false}
                     onCheckedChange={(checked) => {
-                      setDifferentEvaluator(checked)
+                      store.setPsychiatristField('differentEvaluator', checked)
                       if (!checked) {
                         // Clear evaluator fields when toggling off
-                        setEvaluatorField('evaluatorName', '')
-                        setEvaluatorField('evaluatorClinic', '')
-                        clearValidationError('evaluatorName')
-                        clearValidationError('evaluatorClinic')
+                        store.setPsychiatristField('evaluatorName', '')
+                        store.setPsychiatristField('evaluatorClinic', '')
+                        store.clearValidationError('psychiatrist', 'evaluatorName')
+                        store.clearValidationError('psychiatrist', 'evaluatorClinic')
                       }
                     }}
                     aria-label="Different Clinical Evaluator"
@@ -378,8 +369,8 @@ export function PsychiatristEvaluatorSection({
                         onChange={(e) => {
                           const value = e.target.value
                           if (value.length <= 120) {
-                            setEvaluatorField('evaluatorName', value)
-                            clearValidationError('evaluatorName')
+                            store.setPsychiatristField('evaluatorName', value)
+                            store.clearValidationError('psychiatrist', 'evaluatorName')
                           }
                         }}
                         maxLength={120}
@@ -408,8 +399,8 @@ export function PsychiatristEvaluatorSection({
                         onChange={(e) => {
                           const value = e.target.value
                           if (value.length <= 120) {
-                            setEvaluatorField('evaluatorClinic', value)
-                            clearValidationError('evaluatorClinic')
+                            store.setPsychiatristField('evaluatorClinic', value)
+                            store.clearValidationError('psychiatrist', 'evaluatorClinic')
                           }
                         }}
                         maxLength={120}

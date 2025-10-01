@@ -23,7 +23,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
-    "ds:drift": "node scripts/ds-drift-watcher.mjs"
+    "ds:drift": "node scripts/ds-drift-watcher.mjs",
+    "gen:types": "supabase gen types typescript --project-id cvnsdpuhjgyxqisrxjte --schema orbipax_core --schema public > src/lib/database.types.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

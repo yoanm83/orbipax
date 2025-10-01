@@ -9,14 +9,14 @@ import { Input } from "@/shared/ui/primitives/Input"
 import { Label } from "@/shared/ui/primitives/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/shared/ui/primitives/Form"
-import type { DemographicsData } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
+import type { Demographics } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
 
 type HousingStatus = 'homeless' | 'supported' | 'independent' | 'family' | 'group' | 'other'
 
 interface AddressSectionProps {
   onSectionToggle: () => void
   isExpanded: boolean
-  form: UseFormReturn<Partial<DemographicsData>>
+  form: UseFormReturn<Partial<Demographics>>
 }
 
 export function AddressSection({ onSectionToggle, isExpanded, form }: AddressSectionProps) {

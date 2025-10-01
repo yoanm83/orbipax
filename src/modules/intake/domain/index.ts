@@ -41,6 +41,7 @@ export {
   PriorityLevel,
   ProviderType,
   InsuranceType,
+  InsurancePlanKind,
   ConsentType,
   BooleanResponse,
 
@@ -62,14 +63,18 @@ export {
 // =================================================================
 
 export {
-  // Schemas
+  // Schemas (Original names for compatibility)
   addressSchema,
   phoneNumberSchema,
   emergencyContactSchema,
   demographicsDataSchema,
   demographicsSubmissionSchema,
 
-  // Validation Functions
+  // Canonical Schema Exports (Preferred)
+  demographicsSchema,        // Canonical schema name
+  validateDemographics,       // Canonical validator
+
+  // Validation Functions (Original names for compatibility)
   validateDemographicsStep,
   validateDemographicsSubmission,
 
@@ -77,12 +82,15 @@ export {
   calculateAge,
   isMinor,
 
-  // Types
+  // Types (Original names for compatibility)
   type DemographicsData,
   type DemographicsSubmission,
   type Address as DemographicsAddress,
   type PhoneNumber as DemographicsPhoneNumber,
-  type EmergencyContact as DemographicsEmergencyContact
+  type EmergencyContact as DemographicsEmergencyContact,
+
+  // Canonical Type Export (Preferred)
+  type Demographics           // Canonical type name
 } from './schemas/demographics/demographics.schema'
 
 // =================================================================
@@ -98,6 +106,7 @@ export {
   insuranceSubmissionSchema,
 
   // Validation Functions
+  validateInsuranceEligibility,
   validateInsuranceStep,
   validateInsuranceSubmission,
 
@@ -110,8 +119,11 @@ export {
   type EligibilityCriteria,
   type FinancialInformation,
   type InsuranceEligibilityData,
-  type InsuranceSubmission
-} from './schemas/insurance.schema'
+  type InsuranceSubmission,
+
+  // Canonical Type Export
+  type InsuranceEligibility
+} from './schemas/insurance-eligibility/insurance-eligibility.schema'
 
 // =================================================================
 // CLINICAL HISTORY SCHEMA EXPORTS

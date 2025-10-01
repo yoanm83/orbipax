@@ -10,7 +10,7 @@ import { Input } from "@/shared/ui/primitives/Input"
 import { Label } from "@/shared/ui/primitives/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/primitives/Select"
 import { Switch } from "@/shared/ui/primitives/Switch"
-import type { DemographicsData } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
+import type { Demographics } from "@/modules/intake/domain/schemas/demographics/demographics.schema"
 // Utility function for class names
 function cn(...classes: (string | undefined | false)[]): string {
   return classes.filter(Boolean).join(' ')
@@ -20,7 +20,7 @@ interface LegalSectionProps {
   onSectionToggle: () => void
   isExpanded: boolean
   dateOfBirth?: Date | null
-  form: UseFormReturn<Partial<DemographicsData>>
+  form: UseFormReturn<Partial<Demographics>>
 }
 
 export function LegalSection({ onSectionToggle, isExpanded, dateOfBirth, form }: LegalSectionProps) {

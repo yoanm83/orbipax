@@ -11,7 +11,6 @@ import { validatePhoneNumber } from '@/shared/utils/phone'
 import { validateName, normalizeName, NAME_LENGTHS } from '@/shared/utils/name'
 import {
   GenderIdentity,
-  SexAssignedAtBirth,
   Race,
   Ethnicity,
   MaritalStatus,
@@ -104,9 +103,9 @@ export const demographicsDataSchema = z.object({
     }, 'Invalid date of birth')
     .refine(date => date <= new Date(), 'Date of birth cannot be in the future'),
 
-  // USCDI v4 Gender and Sex
+  // Gender
+  gender: z.enum(['male', 'female']),
   genderIdentity: z.nativeEnum(GenderIdentity),
-  sexAssignedAtBirth: z.nativeEnum(SexAssignedAtBirth),
   pronouns: z.string().max(20).optional(),
 
   // Race and Ethnicity (USCDI v4 compliant)
@@ -247,8 +246,58 @@ export const isMinor = (dateOfBirth: Date): boolean => {
 // TYPE EXPORTS
 // =================================================================
 
+/**
+ * Main demographics type for UI and Application layers
+ */
 export type DemographicsData = z.infer<typeof demographicsDataSchema>
+
+/**
+ * Full submission type with multitenant metadata
+ */
 export type DemographicsSubmission = z.infer<typeof demographicsSubmissionSchema>
+
+/**
+ * Address type (reusable)
+ */
 export type Address = z.infer<typeof addressSchema>
+
+/**
+ * Phone number type (reusable)
+ */
 export type PhoneNumber = z.infer<typeof phoneNumberSchema>
+
+/**
+ * Emergency contact type (reusable)
+ */
 export type EmergencyContact = z.infer<typeof emergencyContactSchema>
+
+// =================================================================
+// CANONICAL EXPORTS (For Domain consistency)
+// =================================================================
+
+/**
+ * Canonical schema export - single source of truth for demographics validation
+ */
+export const demographicsSchema = demographicsDataSchema
+
+/**
+ * Canonical type export - primary demographics type
+ */
+export type Demographics = DemographicsData
+
+/**
+ * Canonical validation function - returns JSON-safe result
+ * @param data - Unknown data to validate
+ * @returns Validation result with ok/data/error
+ */
+export const validateDemographics = (data: unknown) => {
+  const result = demographicsDataSchema.safeParse(data)
+  if (result.success) {
+    return { ok: true, data: result.data, error: null }
+  }
+  return {
+    ok: false,
+    data: null,
+    error: result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
+  }
+}

@@ -1,23 +1,19 @@
 'use client'
 
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
+
 import { Button } from "@/shared/ui/primitives/Button"
+import { validateMedicalProviders } from "@/modules/intake/domain/schemas/medical-providers"
+import { useStep4Store, step4Selectors } from "@/modules/intake/state/slices/step4.slice"
 
 import { ProvidersSection } from "./components/ProvidersSection"
 import { PsychiatristEvaluatorSection } from "./components/PsychiatristEvaluatorSection"
-
-// Import validation utilities
-import { validateStep4 } from "@/modules/intake/domain/schemas/step4"
-// Import UI stores
-import {
-  useProvidersUIStore,
-  usePsychiatristUIStore
-} from "@/modules/intake/state/slices/step4"
 
 /**
  * Step 4: Medical Providers
  * Container for medical provider information sections with unified validation
  * SoC: UI layer only - orchestrates sections and handles submit
+ * Now uses canonical Step 4 store (no legacy stores)
  */
 interface Step4MedicalProvidersProps {
   onSubmit?: (data: Record<string, unknown>) => void
@@ -28,104 +24,42 @@ export function Step4MedicalProviders({
   onSubmit,
   onNext
 }: Step4MedicalProvidersProps = {}) {
-  // Local state for collapsible sections
-  const [expandedSections, setExpandedSections] = useState({
-    providers: true,
-    psychiatrist: false
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // Connect to stores for payload collection
-  const providersStore = useProvidersUIStore()
-  const psychiatristStore = usePsychiatristUIStore()
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }))
-  }
-
-  /**
-   * Build payload from all UI stores
-   * Applies conditional logic to exclude unnecessary fields
-   */
-  const buildPayload = useCallback(() => {
-    // Providers payload
-    const providersPayload: Record<string, unknown> = {
-      hasPCP: providersStore.hasPCP
-    }
-    if (providersStore.hasPCP === 'Yes') {
-      providersPayload['pcpName'] = providersStore.pcpName?.trim() || undefined
-      providersPayload['pcpPhone'] = providersStore.pcpPhone?.replace(/\D/g, '') || undefined
-      providersPayload['pcpPractice'] = providersStore.pcpPractice?.trim() || undefined
-      providersPayload['pcpAddress'] = providersStore.pcpAddress?.trim() || undefined
-      providersPayload['authorizedToShare'] = providersStore.authorizedToShare || false
-    }
-
-    // Psychiatrist payload
-    const psychiatristPayload: Record<string, unknown> = {
-      hasBeenEvaluated: psychiatristStore.hasBeenEvaluated
-    }
-    if (psychiatristStore.hasBeenEvaluated === 'Yes') {
-      psychiatristPayload['psychiatristName'] = psychiatristStore.psychiatristName?.trim() || undefined
-      psychiatristPayload['evaluationDate'] = psychiatristStore.evaluationDate || undefined
-      psychiatristPayload['clinicName'] = psychiatristStore.clinicName?.trim() || undefined
-      psychiatristPayload['notes'] = psychiatristStore.notes?.trim() || undefined
-      psychiatristPayload['differentEvaluator'] = psychiatristStore.differentEvaluator || false
-
-      if (psychiatristStore.differentEvaluator) {
-        psychiatristPayload['evaluatorName'] = psychiatristStore.evaluatorName?.trim() || undefined
-        psychiatristPayload['evaluatorClinic'] = psychiatristStore.evaluatorClinic?.trim() || undefined
-      }
-    }
-
-    // Clean undefined values from payloads
-    const cleanPayload = (obj: Record<string, unknown>) => {
-      return Object.fromEntries(
-        Object.entries(obj).filter(([, v]) => v !== undefined)
-      )
-    }
-
-    return {
-      providers: cleanPayload(providersPayload),
-      psychiatrist: cleanPayload(psychiatristPayload),
-      stepId: 'step4-medical-providers'
-    }
-  }, [
-    providersStore,
-    psychiatristStore
-  ])
+  // Connect to canonical store
+  const store = useStep4Store()
+  const isSubmitting = useStep4Store(step4Selectors.isSubmitting)
+  const isProvidersExpanded = useStep4Store(step4Selectors.isProvidersExpanded)
+  const isPsychiatristExpanded = useStep4Store(step4Selectors.isPsychiatristExpanded)
 
   /**
    * Handle unified submit with validation
-   * Distributes errors to respective UI stores
+   * Uses canonical store's buildPayload selector
    */
   const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true)
+    store.setIsSubmitting(true)
+    store.clearValidationErrors()
 
     try {
-      // Build complete payload
-      const payload = buildPayload()
+      // Build payload from canonical store
+      const payload = step4Selectors.buildPayload(useStep4Store.getState())
 
       // Validate with composite schema
-      const result = validateStep4(payload)
+      const result = validateMedicalProviders(payload)
 
-      if (!result.success) {
-        // Map errors to respective stores
+      if (!result.ok) {
+        // Map errors to respective sections in canonical store
         const errorsBySection: Record<string, Record<string, string>> = {
           providers: {},
           psychiatrist: {}
         }
 
         // Process Zod errors
-        result.error.issues.forEach(issue => {
+        result.issues.forEach(issue => {
           const path = issue.path
           if (path.length >= 2) {
             const section = path[0] as string
             const field = path[1] as string
 
-            if (section in errorsBySection) {
+            if (section === 'providers' || section === 'psychiatrist') {
               // Map field-specific error messages
               let message = issue.message
 
@@ -136,37 +70,37 @@ export function Step4MedicalProviders({
                 message = 'Please indicate if you have been evaluated by a psychiatrist'
               }
 
-              errorsBySection[section][field] = message
+              errorsBySection[section]![field] = message
             }
           }
         })
 
-        // Set errors in respective stores
-        if (Object.keys(errorsBySection['providers']).length > 0) {
-          providersStore.setValidationErrors(errorsBySection['providers'])
+        // Set errors in canonical store
+        if (Object.keys(errorsBySection['providers']!).length > 0) {
+          store.setValidationErrors('providers', errorsBySection['providers']!)
         }
-        if (Object.keys(errorsBySection['psychiatrist']).length > 0) {
-          psychiatristStore.setValidationErrors(errorsBySection['psychiatrist'])
+        if (Object.keys(errorsBySection['psychiatrist']!).length > 0) {
+          store.setValidationErrors('psychiatrist', errorsBySection['psychiatrist']!)
         }
 
         // Expand first section with errors
         const sectionsWithErrors = Object.keys(errorsBySection).filter(
-          section => Object.keys(errorsBySection[section]).length > 0
+          section => Object.keys(errorsBySection[section]!).length > 0
         )
         if (sectionsWithErrors.length > 0) {
-          setExpandedSections(prev => ({
-            ...prev,
-            [sectionsWithErrors[0]]: true
-          }))
+          const firstSection = sectionsWithErrors[0] as 'providers' | 'psychiatrist'
+          const currentState = useStep4Store.getState()
+          if (!currentState.expandedSections[firstSection]) {
+            store.toggleSection(firstSection)
+          }
         }
 
-        setIsSubmitting(false)
+        store.setIsSubmitting(false)
         return
       }
 
       // Clear all validation errors on success
-      providersStore.setValidationErrors({})
-      psychiatristStore.setValidationErrors({})
+      store.clearValidationErrors()
 
       // Call onSubmit callback if provided
       if (onSubmit) {
@@ -179,16 +113,14 @@ export function Step4MedicalProviders({
       }
     } catch (error) {
       // Handle unexpected errors gracefully
-      setIsSubmitting(false)
+      store.setIsSubmitting(false)
     } finally {
-      setIsSubmitting(false)
+      store.setIsSubmitting(false)
     }
   }, [
-    buildPayload,
+    store,
     onSubmit,
-    onNext,
-    providersStore,
-    psychiatristStore
+    onNext
   ])
 
   return (
@@ -196,14 +128,14 @@ export function Step4MedicalProviders({
       <div className="p-6 space-y-6">
         {/* Primary Care Provider Section */}
         <ProvidersSection
-          isExpanded={expandedSections.providers}
-          onSectionToggle={() => toggleSection("providers")}
+          isExpanded={isProvidersExpanded}
+          onSectionToggle={() => store.toggleSection("providers")}
         />
 
         {/* Psychiatrist / Clinical Evaluator Section */}
         <PsychiatristEvaluatorSection
-          isExpanded={expandedSections.psychiatrist}
-          onSectionToggle={() => toggleSection("psychiatrist")}
+          isExpanded={isPsychiatristExpanded}
+          onSectionToggle={() => store.toggleSection("psychiatrist")}
         />
 
 
@@ -213,7 +145,6 @@ export function Step4MedicalProviders({
             onClick={handleSubmit}
             disabled={isSubmitting}
             className="min-w-[120px]"
-            variant="primary"
           >
             {isSubmitting ? 'Validating...' : 'Save & Continue'}
           </Button>

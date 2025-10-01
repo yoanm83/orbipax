@@ -173,6 +173,96 @@ export enum SeverityLevel {
 }
 
 /**
+ * Diagnosis type classification
+ */
+export enum DiagnosisType {
+  PRIMARY = 'primary',
+  SECONDARY = 'secondary',
+  RULE_OUT = 'rule-out',
+  PROVISIONAL = 'provisional'
+}
+
+/**
+ * Medication compliance levels
+ */
+export enum MedicationCompliance {
+  FULL = 'full',
+  PARTIAL = 'partial',
+  NON_COMPLIANT = 'non-compliant',
+  NOT_PRESCRIBED = 'not-prescribed',
+  UNKNOWN = 'unknown'
+}
+
+/**
+ * Cognitive functioning assessment levels
+ */
+export enum CognitiveFunctioning {
+  NORMAL = 'normal',
+  MILD_IMPAIRMENT = 'mild-impairment',
+  MODERATE_IMPAIRMENT = 'moderate-impairment',
+  SEVERE_IMPAIRMENT = 'severe-impairment',
+  UNKNOWN = 'unknown'
+}
+
+/**
+ * Independence level for activities of daily living
+ */
+export enum IndependenceLevel {
+  INDEPENDENT = 'independent',
+  MINIMAL_ASSISTANCE = 'minimal-assistance',
+  MODERATE_ASSISTANCE = 'moderate-assistance',
+  MAXIMUM_ASSISTANCE = 'maximum-assistance',
+  DEPENDENT = 'dependent',
+  UNKNOWN = 'unknown'
+}
+
+/**
+ * Social functioning assessment
+ */
+export enum SocialFunctioning {
+  EXCELLENT = 'excellent',
+  GOOD = 'good',
+  FAIR = 'fair',
+  POOR = 'poor',
+  VERY_POOR = 'very-poor',
+  UNKNOWN = 'unknown'
+}
+
+/**
+ * Occupational functioning status
+ */
+export enum OccupationalFunctioning {
+  FULL_TIME = 'full-time',
+  PART_TIME = 'part-time',
+  UNABLE_TO_WORK = 'unable-to-work',
+  NOT_APPLICABLE = 'not-applicable',
+  UNKNOWN = 'unknown'
+}
+
+/**
+ * Cognitive status assessment
+ */
+export enum CognitiveStatus {
+  ALERT_ORIENTED = 'alert-oriented',
+  MILD_CONFUSION = 'mild-confusion',
+  MODERATE_CONFUSION = 'moderate-confusion',
+  SEVERE_CONFUSION = 'severe-confusion',
+  UNKNOWN = 'unknown'
+}
+
+/**
+ * WHODAS 2.0 functional domains
+ */
+export enum WHODASDomain {
+  COGNITION = 'cognition',
+  MOBILITY = 'mobility',
+  SELF_CARE = 'self-care',
+  GETTING_ALONG = 'getting-along',
+  LIFE_ACTIVITIES = 'life-activities',
+  PARTICIPATION = 'participation'
+}
+
+/**
  * Treatment goals priority levels
  */
 export enum PriorityLevel {
@@ -205,6 +295,19 @@ export enum InsuranceType {
   PRIVATE = 'private',
   TRICARE = 'tricare',
   UNINSURED = 'uninsured',
+  OTHER = 'other'
+}
+
+/**
+ * Insurance plan types (network structure)
+ * Aligned with database ENUM and common insurance plan structures
+ */
+export enum InsurancePlanKind {
+  HMO = 'hmo',           // Health Maintenance Organization
+  PPO = 'ppo',           // Preferred Provider Organization
+  EPO = 'epo',           // Exclusive Provider Organization
+  POS = 'pos',           // Point of Service
+  HDHP = 'hdhp',         // High Deductible Health Plan
   OTHER = 'other'
 }
 

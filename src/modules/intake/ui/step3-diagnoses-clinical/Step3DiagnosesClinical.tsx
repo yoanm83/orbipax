@@ -1,14 +1,19 @@
 'use client'
 
-import { useCallback, useState } from "react"
+import { zodResolver } from '@hookform/resolvers/zod'
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useForm } from 'react-hook-form'
 
-import { validateStep3 } from "@/modules/intake/domain/schemas/step3"
-import {
-  useDiagnosesUIStore,
-  usePsychiatricEvaluationUIStore,
-  useFunctionalAssessmentUIStore
-} from "@/modules/intake/state/slices/step3"
 import { Button } from "@/shared/ui/primitives/Button"
+import { Form } from "@/shared/ui/primitives/Form"
+
+import { loadStep3Action, upsertDiagnosesAction } from "@/modules/intake/actions/step3"
+import {
+  step3DataPartialSchema,
+  type Step3DataPartial
+} from "@/modules/intake/domain/schemas/diagnoses-clinical"
+import { useStep3UiStore } from "@/modules/intake/state/slices/step3-ui.slice"
 
 import { DiagnosesSection } from "./components/DiagnosesSection"
 import { FunctionalAssessmentSection } from "./components/FunctionalAssessmentSection"
@@ -25,21 +30,62 @@ interface Step3DiagnosesClinicalProps {
 }
 
 export function Step3DiagnosesClinical({
-  onSubmit,
+  onSubmit: onSubmitCallback,
   onNext
 }: Step3DiagnosesClinicalProps = {}) {
+  const pathname = usePathname()
+
+  // UI-only flags from canonical store
+  const uiStore = useStep3UiStore()
+
+  // Initialize React Hook Form with Zod resolver
+  const form = useForm<Step3DataPartial>({
+    resolver: zodResolver(step3DataPartialSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      diagnoses: {
+        primaryDiagnosis: '',
+        secondaryDiagnoses: [],
+        substanceUseDisorder: undefined,
+        mentalHealthHistory: '',
+        diagnosisRecords: []
+      },
+      psychiatricEvaluation: {
+        currentSymptoms: [],
+        severityLevel: undefined,
+        suicidalIdeation: undefined,
+        homicidalIdeation: undefined,
+        psychoticSymptoms: undefined,
+        medicationCompliance: undefined,
+        treatmentHistory: '',
+        hasPsychEval: false,
+        evaluationDate: undefined,
+        evaluatedBy: undefined,
+        evaluationSummary: undefined
+      },
+      functionalAssessment: {
+        affectedDomains: [],
+        adlsIndependence: undefined,
+        iadlsIndependence: undefined,
+        cognitiveFunctioning: undefined,
+        hasSafetyConcerns: false,
+        globalFunctioning: undefined,
+        dailyLivingActivities: [],
+        socialFunctioning: undefined,
+        occupationalFunctioning: undefined,
+        cognitiveStatus: undefined,
+        adaptiveBehavior: undefined,
+        additionalNotes: undefined
+      }
+    }
+  })
+
   // Local state for collapsible sections
   const [expandedSections, setExpandedSections] = useState({
     diagnoses: true,
     psychiatric: false,
     functional: false
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // Connect to stores for payload collection
-  const diagnosesStore = useDiagnosesUIStore()
-  const psychiatricStore = usePsychiatricEvaluationUIStore()
-  const functionalStore = useFunctionalAssessmentUIStore()
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -48,137 +94,80 @@ export function Step3DiagnosesClinical({
     }))
   }
 
-  /**
-   * Build payload from all UI stores
-   * Applies conditional logic to exclude unnecessary fields
-   */
-  const buildPayload = useCallback(() => {
-    // Diagnoses payload
-    const diagnosesPayload: Record<string, unknown> = {
-      primaryDiagnosis: diagnosesStore.primaryDiagnosis ?? undefined,
-      secondaryDiagnoses: diagnosesStore.secondaryDiagnoses?.filter(d => d.trim()) ?? [],
-      substanceUseDisorder: diagnosesStore.substanceUseDisorder ?? undefined,
-      mentalHealthHistory: diagnosesStore.mentalHealthHistory?.trim() ?? undefined
+  // Load existing clinical assessment data on mount
+  // Guard: Skip preload if we're in /patients/new (no existing patient to load)
+  useEffect(() => {
+    // Check if we're in the "new" patient flow
+    const isNewPatient = pathname?.includes('/patients/new')
+
+    if (isNewPatient) {
+      // Skip preload - use default empty form values
+      return
     }
 
-    // Psychiatric Evaluation payload
-    const psychiatricPayload: Record<string, unknown> = {
-      currentSymptoms: psychiatricStore.currentSymptoms?.filter(s => s.trim()) ?? [],
-      severityLevel: psychiatricStore.severityLevel ?? undefined,
-      suicidalIdeation: psychiatricStore.suicidalIdeation ?? undefined,
-      homicidalIdeation: psychiatricStore.homicidalIdeation ?? undefined,
-      psychoticSymptoms: psychiatricStore.psychoticSymptoms ?? undefined,
-      medicationCompliance: psychiatricStore.medicationCompliance ?? undefined,
-      treatmentHistory: psychiatricStore.treatmentHistory?.trim() ?? undefined
+    const loadData = async () => {
+      uiStore.markLoading(true)
+      uiStore.setLoadError(null)
+
+      try {
+        // Call loadStep3Action (sessionId auto-resolved server-side)
+        const result = await loadStep3Action()
+
+        if (result.ok && result.data) {
+          // Hydrate form with loaded data (RHF handles all fields)
+          form.reset(result.data)
+        } else if (!result.ok && result.error?.code !== 'NOT_FOUND') {
+          // Show error for failures other than NOT_FOUND (no data is expected state)
+          uiStore.setLoadError('Something went wrong while loading your information. Please refresh the page.')
+        }
+        // If NOT_FOUND, use defaults (already set in defaultValues)
+      } catch {
+        // Unexpected error - show generic message
+        uiStore.setLoadError('Something went wrong while loading your information. Please refresh the page.')
+      } finally {
+        uiStore.markLoading(false)
+      }
     }
 
-    // Functional Assessment payload
-    const functionalPayload: Record<string, unknown> = {
-      globalFunctioning: functionalStore.globalFunctioning ?? undefined,
-      dailyLivingActivities: functionalStore.dailyLivingActivities ?? [],
-      socialFunctioning: functionalStore.socialFunctioning ?? undefined,
-      occupationalFunctioning: functionalStore.occupationalFunctioning ?? undefined,
-      cognitiveStatus: functionalStore.cognitiveStatus ?? undefined,
-      adaptiveBehavior: functionalStore.adaptiveBehavior?.trim() ?? undefined
-    }
-
-    // Clean undefined values from payloads
-    const cleanPayload = (obj: Record<string, unknown>) => {
-      return Object.fromEntries(
-        Object.entries(obj).filter(([, v]) => v !== undefined)
-      )
-    }
-
-    return {
-      diagnoses: cleanPayload(diagnosesPayload),
-      psychiatricEvaluation: cleanPayload(psychiatricPayload),
-      functionalAssessment: cleanPayload(functionalPayload),
-      stepId: 'step3-diagnoses-clinical'
-    }
-  }, [
-    diagnosesStore,
-    psychiatricStore,
-    functionalStore
-  ])
+    loadData()
+  }, [pathname, uiStore, form])
 
   /**
-   * Handle unified submit with validation
-   * Distributes errors to respective UI stores
+   * Handle unified submit with RHF
+   * Validation automatic via zodResolver
    */
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true)
+  const onSubmit = async (data: Step3DataPartial) => {
+    uiStore.markSaving(true)
+    uiStore.setSaveError(null)
 
     try {
-      // Build complete payload
-      const payload = buildPayload()
+      // Validation already done by zodResolver
+      // data is clean and type-safe
 
-      // Validate with composite schema
-      const result = validateStep3(payload)
+      // Call server action to persist data
+      const result = await upsertDiagnosesAction(data as Record<string, unknown>)
 
-      if (!result.success) {
-        // Map errors to respective stores
-        const errorsBySection: Record<string, Record<string, string>> = {
-          diagnoses: {},
-          psychiatricEvaluation: {},
-          functionalAssessment: {}
+      if (!result.ok) {
+        // Map error codes to generic messages
+        let errorMessage = 'Unable to save clinical assessment. Please try again.'
+
+        if (result.error?.code === 'VALIDATION_FAILED') {
+          errorMessage = 'Invalid clinical assessment data provided.'
+        } else if (result.error?.code === 'UNAUTHORIZED') {
+          errorMessage = 'Your session has expired. Please refresh the page.'
         }
 
-        // Process Zod errors
-        result.error.issues.forEach(issue => {
-          const path = issue.path
-          if (path.length >= 2) {
-            const section = path[0] as string
-            const field = path[1] as string
-
-            if (section in errorsBySection) {
-              errorsBySection[section][field] = issue.message
-            }
-          }
-        })
-
-        // Set errors in respective stores
-        if (Object.keys(errorsBySection['diagnoses']).length > 0) {
-          diagnosesStore.setValidationErrors(errorsBySection['diagnoses'])
-        }
-        if (Object.keys(errorsBySection['psychiatricEvaluation']).length > 0) {
-          psychiatricStore.setValidationErrors(errorsBySection['psychiatricEvaluation'])
-        }
-        if (Object.keys(errorsBySection['functionalAssessment']).length > 0) {
-          functionalStore.setValidationErrors(errorsBySection['functionalAssessment'])
-        }
-
-        // Expand first section with errors
-        const sectionsWithErrors = Object.keys(errorsBySection).filter(
-          section => Object.keys(errorsBySection[section]).length > 0
-        )
-        if (sectionsWithErrors.length > 0) {
-          const sectionMap: Record<string, keyof typeof expandedSections> = {
-            diagnoses: 'diagnoses',
-            psychiatricEvaluation: 'psychiatric',
-            functionalAssessment: 'functional'
-          }
-          const sectionKey = sectionMap[sectionsWithErrors[0]]
-          if (sectionKey) {
-            setExpandedSections(prev => ({
-              ...prev,
-              [sectionKey]: true
-            }))
-          }
-        }
-
-        setIsSubmitting(false)
+        uiStore.setSaveError(errorMessage)
         return
       }
 
-      // Clear all validation errors on success
-      diagnosesStore.setValidationErrors({})
-      psychiatricStore.setValidationErrors({})
-      functionalStore.setValidationErrors({})
-
-      // Call onSubmit callback if provided
-      if (onSubmit) {
-        await onSubmit(payload)
+      // Call onSubmit callback if provided (for additional side effects)
+      if (onSubmitCallback) {
+        await onSubmitCallback(data as Record<string, unknown>)
       }
+
+      // Mark as saved and navigate
+      uiStore.markSaved()
 
       // Navigate to next step if callback provided
       if (onNext) {
@@ -186,52 +175,80 @@ export function Step3DiagnosesClinical({
       }
     } catch {
       // Handle unexpected errors gracefully
-      setIsSubmitting(false)
+      uiStore.setSaveError('An unexpected error occurred. Please try again.')
     } finally {
-      setIsSubmitting(false)
+      uiStore.markSaving(false)
     }
-  }, [
-    buildPayload,
-    onSubmit,
-    onNext,
-    diagnosesStore,
-    psychiatricStore,
-    functionalStore
-  ])
+  }
 
   return (
-    <div className="flex-1 w-full">
-      <div className="p-6 space-y-6">
-        {/* Diagnoses (DSM-5) Section */}
-        <DiagnosesSection
-          isExpanded={expandedSections.diagnoses}
-          onSectionToggle={() => toggleSection("diagnoses")}
-        />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 w-full">
+        <div className="p-6 space-y-6">
+          {/* Loading state */}
+          {uiStore.isLoading && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="p-4 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+            >
+              Loading clinical assessment information...
+            </div>
+          )}
 
-        {/* Psychiatric Evaluation Section */}
-        <PsychiatricEvaluationSection
-          isExpanded={expandedSections.psychiatric}
-          onSectionToggle={() => toggleSection("psychiatric")}
-        />
+          {/* Load error display */}
+          {uiStore.loadError && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="p-4 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+            >
+              {uiStore.loadError}
+            </div>
+          )}
 
-        {/* Functional Assessment Section */}
-        <FunctionalAssessmentSection
-          isExpanded={expandedSections.functional}
-          onSectionToggle={() => toggleSection("functional")}
-        />
+          {/* Save error display */}
+          {uiStore.saveError && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="p-4 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+            >
+              {uiStore.saveError}
+            </div>
+          )}
 
-        {/* Submit Button */}
-        <div className="flex justify-end pt-6 border-t border-[var(--border)]">
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="min-w-[120px]"
-            variant="primary"
-          >
-            {isSubmitting ? 'Validating...' : 'Save & Continue'}
-          </Button>
+          {/* Diagnoses (DSM-5) Section */}
+          <DiagnosesSection
+            isExpanded={expandedSections.diagnoses}
+            onSectionToggle={() => toggleSection("diagnoses")}
+          />
+
+          {/* Psychiatric Evaluation Section */}
+          <PsychiatricEvaluationSection
+            isExpanded={expandedSections.psychiatric}
+            onSectionToggle={() => toggleSection("psychiatric")}
+          />
+
+          {/* Functional Assessment Section */}
+          <FunctionalAssessmentSection
+            isExpanded={expandedSections.functional}
+            onSectionToggle={() => toggleSection("functional")}
+          />
+
+          {/* Submit Button */}
+          <div className="flex justify-end pt-6 border-[var(--border)]">
+            <Button
+              type="submit"
+              disabled={uiStore.isLoading || uiStore.isSaving}
+              className="min-w-[120px]"
+              variant="primary"
+            >
+              {uiStore.isSaving ? 'Saving...' : 'Save & Continue'}
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </form>
+    </Form>
   )
 }

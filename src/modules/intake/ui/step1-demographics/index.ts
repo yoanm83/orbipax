@@ -10,7 +10,7 @@
 // MAIN COMPONENT EXPORT
 // =================================================================
 
-export { IntakeWizardStep1Demographics } from './components/intake-wizard-step1-demographics'
+export { IntakeWizardStep1Demographics } from './Step1Demographics'
 
 // =================================================================
 // SUB-COMPONENTS EXPORTS

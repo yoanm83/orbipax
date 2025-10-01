@@ -1,11 +1,12 @@
 import OpenAI from 'openai'
 import { z } from 'zod'
 
-import { DIAGNOSIS_TYPE, DIAGNOSIS_SEVERITY, type DiagnosisType, type DiagnosisSeverity } from './diagnoses.enums'
 import { auditLog } from '@/shared/utils/telemetry/audit-log'
 
+import { DIAGNOSIS_TYPE, DIAGNOSIS_SEVERITY, type DiagnosisType, type DiagnosisSeverity } from './diagnoses.enums'
+
 // Re-export for backward compatibility
-export { DiagnosisType, DiagnosisSeverity }
+export type { DiagnosisType, DiagnosisSeverity }
 
 // Strict schema for individual diagnosis suggestion
 const DiagnosisSuggestionSchema = z.object({
@@ -34,7 +35,7 @@ export async function getDiagnosisSuggestionsFromAI(
 ): Promise<ServiceResult<z.infer<typeof AIResponseSchema>>> {
   try {
     // Access API key from environment (server-only)
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = process.env['OPENAI_API_KEY']
 
     if (!apiKey) {
       // Generic error - don't expose missing key details

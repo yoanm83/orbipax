@@ -1,12 +1,12 @@
 'use client'
 
-import { User, ChevronUp, ChevronDown } from "lucide-react"
 import { useMemo, useCallback } from "react"
+import { User, ChevronUp, ChevronDown } from "lucide-react"
 
 import { Card, CardBody } from "@/shared/ui/primitives/Card"
 import { Checkbox } from "@/shared/ui/primitives/Checkbox"
 import { Input } from "@/shared/ui/primitives/Input"
-import { Label } from "@/shared/ui/primitives/label"
+import { Label } from "@/shared/ui/primitives/Label"
 import {
   Select,
   SelectContent,
@@ -14,12 +14,8 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/shared/ui/primitives/Select"
-
-// Import validation from schema
-import { validateProviders } from "@/modules/intake/domain/schemas/step4"
-// Import store
-import { useProvidersUIStore } from "@/modules/intake/state/slices/step4"
-// Import phone utilities from shared
+import { validateProviders } from "@/modules/intake/domain/schemas/medical-providers"
+import { useStep4Store, step4Selectors } from "@/modules/intake/state/slices/step4.slice"
 import { normalizePhoneNumber, formatPhoneInput } from "@/shared/utils/phone"
 
 interface ProvidersSectionProps {
@@ -47,8 +43,13 @@ export function ProvidersSection({
   // Generate unique section ID for this instance
   const sectionUid = useMemo(() => `pcp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, [])
 
-  // Connect to store
-  const store = useProvidersUIStore()
+  // Connect to canonical store
+  const store = useStep4Store()
+  const providers = useStep4Store(step4Selectors.providers)
+  const validationErrors = useStep4Store(step4Selectors.providersErrors)
+  const storeIsExpanded = useStep4Store(step4Selectors.isProvidersExpanded)
+
+  // Extract provider fields
   const {
     hasPCP,
     pcpName,
@@ -56,22 +57,12 @@ export function ProvidersSection({
     pcpPhone,
     pcpAddress,
     authorizedToShare,
-    phoneDisplayValue,
-    isExpanded: storeIsExpanded,
-    validationErrors,
-    setHasPCP,
-    setPCPField,
-    setPhoneNumber,
-    toggleAuthorization,
-    toggleExpanded,
-    setValidationErrors,
-    clearValidationError,
-    resetConditionalFields
-  } = store
+    phoneDisplayValue
+  } = providers
 
   // Use external isExpanded if provided, otherwise use store
   const isExpanded = externalIsExpanded ?? storeIsExpanded
-  const handleToggle = onSectionToggle ?? toggleExpanded
+  const handleToggle = onSectionToggle ?? (() => store.toggleSection('providers'))
 
   // Generate payload for submission
   const getPayload = useCallback(() => {
@@ -95,11 +86,11 @@ export function ProvidersSection({
     const payload = getPayload()
     const result = validateProviders(payload)
 
-    if (!result.success) {
+    if (!result.ok) {
       const errors: Record<string, string> = {}
 
       // Map Zod errors to field-specific messages
-      result.error.issues.forEach((issue) => {
+      result.issues.forEach((issue) => {
         const field = issue.path[0] as string
 
         if (field === 'hasPCP') {
@@ -125,14 +116,14 @@ export function ProvidersSection({
         }
       })
 
-      setValidationErrors(errors)
+      store.setValidationErrors('providers', errors)
       return false
     }
 
     // Clear all errors on successful validation
-    setValidationErrors({})
+    store.setValidationErrors('providers', {})
     return true
-  }, [getPayload, pcpName, pcpPhone, setValidationErrors])
+  }, [store, getPayload, pcpName, pcpPhone])
 
   // Expose validation interface via ref or imperative handle
   // Parent can access these via a ref
@@ -181,13 +172,13 @@ export function ProvidersSection({
               <Select
                 value={hasPCP ?? ''}
                 onValueChange={(value) => {
-                  setHasPCP(value as 'Yes' | 'No' | 'Unknown')
+                  store.setProvidersField('hasPCP', value as 'Yes' | 'No' | 'Unknown')
                   if (value) {
-                    clearValidationError('hasPCP')
+                    store.clearValidationError('providers', 'hasPCP')
                   }
                   // Clear conditional fields when not "Yes"
                   if (value !== 'Yes') {
-                    resetConditionalFields()
+                    store.resetConditionalFields('providers')
                   }
                 }}
               >
@@ -231,10 +222,10 @@ export function ProvidersSection({
                       onChange={(e) => {
                         const value = e.target.value
                         if (value.length <= 120) {
-                          setPCPField('pcpName', value)
+                          store.setProvidersField('pcpName', value)
                           // Clear error if valid
                           if (value.trim()) {
-                            clearValidationError('pcpName')
+                            store.clearValidationError('providers', 'pcpName')
                           }
                         }
                       }}
@@ -265,8 +256,8 @@ export function ProvidersSection({
                       onChange={(e) => {
                         const value = e.target.value
                         if (value.length <= 120) {
-                          setPCPField('pcpPractice', value)
-                          clearValidationError('pcpPractice')
+                          store.setProvidersField('pcpPractice', value)
+                          store.clearValidationError('providers', 'pcpPractice')
                         }
                       }}
                       maxLength={120}
@@ -298,8 +289,8 @@ export function ProvidersSection({
                       onChange={(e) => {
                         const value = e.target.value
                         if (value.length <= 200) {
-                          setPCPField('pcpAddress', value)
-                          clearValidationError('pcpAddress')
+                          store.setProvidersField('pcpAddress', value)
+                          store.clearValidationError('providers', 'pcpAddress')
                         }
                       }}
                       maxLength={200}
@@ -327,11 +318,11 @@ export function ProvidersSection({
                       value={phoneDisplayValue ?? ''}
                       onChange={(e) => {
                         const formatted = formatPhoneInput(e.target.value, phoneDisplayValue ?? '')
-                        setPhoneNumber(formatted)
-                        // Clear error if valid (10+ digits)
                         const normalized = normalizePhoneNumber(formatted)
+                        store.setPhoneNumber(formatted, normalized)
+                        // Clear error if valid (10+ digits)
                         if (normalized.length >= 10) {
-                          clearValidationError('pcpPhone')
+                          store.clearValidationError('providers', 'pcpPhone')
                         }
                       }}
                       placeholder="(305) 555-0100"
@@ -354,7 +345,9 @@ export function ProvidersSection({
                   <Checkbox
                     id="pcp-share"
                     checked={authorizedToShare ?? false}
-                    onCheckedChange={toggleAuthorization}
+                    onCheckedChange={(checked) => {
+                      store.setProvidersField('authorizedToShare', checked === true)
+                    }}
                     aria-label="Authorized to share medical information with PCP"
                   />
                   <Label
